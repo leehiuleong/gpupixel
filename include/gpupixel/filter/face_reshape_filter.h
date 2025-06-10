@@ -28,7 +28,7 @@ class GPUPIXEL_API FaceReshapeFilter : public Filter {
   float big_eye_delta_ = 0.0;
 
   std::vector<float> face_landmarks_;
-  int has_face_ = 0;
+  int face_count_ = 0;
 };
 
 }  // namespace gpupixel
