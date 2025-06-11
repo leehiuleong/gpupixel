@@ -149,6 +149,7 @@ const std::string kGPUPixelThinFaceFragmentShaderString = R"(
      return result;
  }
 
+// 瘦脸
  vec2 thinFace(vec2 currentCoordinate, int faceIndex) {
      int baseIndex = faceIndex * 222;
      vec2 faceIndexs[9];
@@ -173,6 +174,165 @@ const std::string kGPUPixelThinFaceFragmentShaderString = R"(
      return currentCoordinate;
  }
 
+// v脸
+  vec2 vFace(vec2 currentCoordinate, int faceIndex) {
+     int baseIndex = faceIndex * 222;
+     vec2 faceIndexs[4];
+     faceIndexs[0] = vec2(10., 95.);
+     faceIndexs[1] = vec2(22., 91.);
+     faceIndexs[2] = vec2(14., 20.);
+     faceIndexs[3] = vec2(18., 13.);
+
+     for(int i = 0; i < 4; i++)
+     {
+         int originIndex = int(faceIndexs[i].x);
+         int targetIndex = int(faceIndexs[i].y);
+         vec2 originPoint = vec2(facePoints[baseIndex + originIndex * 2], facePoints[baseIndex + originIndex * 2 + 1]);
+         vec2 targetPoint = vec2(facePoints[baseIndex + targetIndex * 2], facePoints[baseIndex + targetIndex * 2 + 1]);
+         currentCoordinate = curveWarp(currentCoordinate, originPoint, targetPoint, thinFaceDelta);
+     }
+     return currentCoordinate;
+ }
+
+// 窄脸
+   vec2 zhaiFace(vec2 currentCoordinate, int faceIndex) {
+     int baseIndex = faceIndex * 222;
+    
+     vec2 faceIndexs[6];
+    faceIndexs[0] = vec2(0., 33.);
+     faceIndexs[1] = vec2(33., 0.);
+     faceIndexs[2] = vec2(3., 29.);
+     faceIndexs[3] = vec2(29., 3.);
+     faceIndexs[4] = vec2(7., 25.);
+     faceIndexs[5] = vec2(25., 7.);
+ 
+
+     for(int i = 0; i < 6; i++)
+     {
+         int originIndex = int(faceIndexs[i].x);
+         int targetIndex = int(faceIndexs[i].y);
+         vec2 originPoint = vec2(facePoints[baseIndex + originIndex * 2], facePoints[baseIndex + originIndex * 2 + 1]);
+         vec2 targetPoint = vec2(facePoints[baseIndex + targetIndex * 2], facePoints[baseIndex + targetIndex * 2 + 1]);
+         currentCoordinate = curveWarp(currentCoordinate, originPoint, targetPoint, thinFaceDelta);
+     }
+     return currentCoordinate;
+ }
+
+// 短脸
+   vec2 shortFace(vec2 currentCoordinate, int faceIndex) {
+     int baseIndex = faceIndex * 222;
+     vec2 faceIndexs[5];
+     faceIndexs[0] = vec2(10., 52.);
+     faceIndexs[1] = vec2(22., 61.);
+     faceIndexs[2] = vec2(14., 82.);
+     faceIndexs[3] = vec2(18., 83.);
+     faceIndexs[4] = vec2(16., 49.);
+     
+     for(int i = 0; i < 5; i++)
+     {
+         int originIndex = int(faceIndexs[i].x);
+         int targetIndex = int(faceIndexs[i].y);
+         vec2 originPoint = vec2(facePoints[baseIndex + originIndex * 2], facePoints[baseIndex + originIndex * 2 + 1]);
+         vec2 targetPoint = vec2(facePoints[baseIndex + targetIndex * 2], facePoints[baseIndex + targetIndex * 2 + 1]);
+         currentCoordinate = curveWarp(currentCoordinate, originPoint, targetPoint, thinFaceDelta);
+     }
+     return currentCoordinate;
+ }
+
+// 颧骨
+    vec2 quanGu(vec2 currentCoordinate, int faceIndex) {
+     int baseIndex = faceIndex * 222;
+      vec2 faceIndexs[6];
+      faceIndexs[0] = vec2(3., 44.);
+      faceIndexs[1] = vec2(29., 44.);
+      faceIndexs[2] = vec2(4., 80.);
+      faceIndexs[3] = vec2(28., 81.);
+      faceIndexs[4] = vec2(5., 80.);
+      faceIndexs[5] = vec2(27., 81.);
+
+     
+     for(int i = 0; i < 6; i++)
+     {
+         int originIndex = int(faceIndexs[i].x);
+         int targetIndex = int(faceIndexs[i].y);
+         vec2 originPoint = vec2(facePoints[baseIndex + originIndex * 2], facePoints[baseIndex + originIndex * 2 + 1]);
+         vec2 targetPoint = vec2(facePoints[baseIndex + targetIndex * 2], facePoints[baseIndex + targetIndex * 2 + 1]);
+         currentCoordinate = curveWarp(currentCoordinate, originPoint, targetPoint, thinFaceDelta);
+     }
+     return currentCoordinate;
+ }
+
+// 下颌骨
+  vec2 xiaheGu(vec2 currentCoordinate, int faceIndex) {
+     int baseIndex = faceIndex * 222;
+      vec2 faceIndexs[8];
+      faceIndexs[0] = vec2(7., 49.);
+      faceIndexs[1] = vec2(25., 49.);
+      faceIndexs[2] = vec2(8., 49.);
+      faceIndexs[3] = vec2(24., 49.);
+      faceIndexs[4] = vec2(9., 87.);
+      faceIndexs[5] = vec2(23., 87.);
+      faceIndexs[6] = vec2(10., 87.);
+      faceIndexs[7] = vec2(22., 87.);
+     
+     for(int i = 0; i < 8; i++)
+     {
+         int originIndex = int(faceIndexs[i].x);
+         int targetIndex = int(faceIndexs[i].y);
+         vec2 originPoint = vec2(facePoints[baseIndex + originIndex * 2], facePoints[baseIndex + originIndex * 2 + 1]);
+         vec2 targetPoint = vec2(facePoints[baseIndex + targetIndex * 2], facePoints[baseIndex + targetIndex * 2 + 1]);
+         currentCoordinate = curveWarp(currentCoordinate, originPoint, targetPoint, thinFaceDelta);
+     }
+     return currentCoordinate;
+ }
+
+
+ // 下巴
+  vec2 xiaBa(vec2 currentCoordinate, int faceIndex) {
+     int baseIndex = faceIndex * 222;
+      vec2 faceIndexs[7];
+      faceIndexs[0] = vec2(13., 82.);
+      faceIndexs[1] = vec2(19., 83.);
+      faceIndexs[2] = vec2(14., 47.);
+      faceIndexs[3] = vec2(18., 51.);
+      faceIndexs[4] = vec2(15., 48.);
+      faceIndexs[5] = vec2(17., 50.);
+      faceIndexs[6] = vec2(16., 49.);
+     
+     for(int i = 0; i < 7; i++)
+     {
+         int originIndex = int(faceIndexs[i].x);
+         int targetIndex = int(faceIndexs[i].y);
+         vec2 originPoint = vec2(facePoints[baseIndex + originIndex * 2], facePoints[baseIndex + originIndex * 2 + 1]);
+         vec2 targetPoint = vec2(facePoints[baseIndex + targetIndex * 2], facePoints[baseIndex + targetIndex * 2 + 1]);
+         currentCoordinate = curveWarp(currentCoordinate, originPoint, targetPoint, thinFaceDelta);
+     }
+     return currentCoordinate;
+ }
+
+  // 瘦鼻
+  vec2 shouBi(vec2 currentCoordinate, int faceIndex) {
+     int baseIndex = faceIndex * 222;
+      vec2 faceIndexs[6];
+      faceIndexs[0] = vec2(80., 81.);
+      faceIndexs[1] = vec2(81., 80.);
+      faceIndexs[2] = vec2(82., 83.);
+      faceIndexs[3] = vec2(83., 82.);
+      faceIndexs[4] = vec2(47., 51.);
+      faceIndexs[5] = vec2(51., 47.);
+     
+     for(int i = 0; i < 6; i++)
+     {
+         int originIndex = int(faceIndexs[i].x);
+         int targetIndex = int(faceIndexs[i].y);
+         vec2 originPoint = vec2(facePoints[baseIndex + originIndex * 2], facePoints[baseIndex + originIndex * 2 + 1]);
+         vec2 targetPoint = vec2(facePoints[baseIndex + targetIndex * 2], facePoints[baseIndex + targetIndex * 2 + 1]);
+         currentCoordinate = curveWarp(currentCoordinate, originPoint, targetPoint, thinFaceDelta);
+     }
+     return currentCoordinate;
+ }
+
+// 大眼
  vec2 bigEye(vec2 currentCoordinate, int faceIndex) {
      int baseIndex = faceIndex * 222;
 
@@ -200,7 +360,8 @@ const std::string kGPUPixelThinFaceFragmentShaderString = R"(
      vec2 positionToUse = textureCoordinate;
 
      for(int i = 0; i < faceCount; i++) {
-         positionToUse = thinFace(positionToUse, i);
+        //  positionToUse = thinFace(positionToUse, i);
+         positionToUse = shouBi(positionToUse, i);
          positionToUse = bigEye(positionToUse, i);
      }
 
