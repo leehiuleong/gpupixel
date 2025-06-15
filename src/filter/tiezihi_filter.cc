@@ -60,7 +60,7 @@ bool TieZhiFilter::Init() {
 }
 
 bool TieZhiFilter::DoRender(bool updateSinks) {
-  static const float image_vertices[] = {
+  float image_vertices[] = {
       -1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f,
   };
 
@@ -94,66 +94,42 @@ bool TieZhiFilter::DoRender(bool updateSinks) {
                                 image_vertices));
   GL_CALL(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
 
-  // 根据宽高比创建缩放矩阵
-  float position_x = -0.1f;
-  float position_y = -0.7f;
-
-  float large_side =
-      std::max(source_image_->GetWidth(), source_image_->GetHeight());
-  float scale_x = source_image_->GetWidth() / large_side * 0.3f;
-  float scale_y = source_image_->GetHeight() / large_side * 0.3f;
-
-  float aspect = (float)framebuffer_->GetWidth() / framebuffer_->GetHeight();
-
-  if (aspect > 1.0f) {
-    scale_x /= aspect;
-  } else {
-    scale_y *= aspect;
-  }
-  glm::mat4 scale_matrix = glm::scale(glm::vec3(0.12f, 0.24f, 1.0f));
-
-  float tr_x = 0.0f;
-  float tr_y = 0.0f;
+  float position_x = 0.0f;
+  float position_y = 0.0f;
 
   if (face_landmarks_.size() > 0) {
     float x = face_landmarks_[43 * 2];      // x
     float y = face_landmarks_[43 * 2 + 1];  // y
-    tr_x = x * 2 - 1;
-    tr_y = y * 2 - 1;
+    position_x = x * 2 - 1;
+    position_y = y * 2 - 1;
   }
-  // 创建平移矩阵
-  glm::mat4 translation_matrix = glm::translate(glm::vec3(tr_x, tr_y, 0.0f));
 
   LOG_INFO("pitch_ = {}, yaw_ = {}, roll_ = {}", pitch_, yaw_, roll_);
-  // 将旋转矩阵和缩放矩阵相乘
-  // z
-  static float angle = 0.0f;
-  angle += 1.0f;
-  scale_matrix = glm::rotate(scale_matrix, glm::radians(angle),
-                             glm::vec3(0.0f, 0.0f, 1.0f));
   // 组合所有变换矩阵，注意变换顺序：先缩放，再旋转，最后平移
-  // glm::mat4 final_matrix = translation_matrix * roll_matrix * scale_matrix;
-  glm::mat4 final_matrix = translation_matrix * scale_matrix;
+  glm::mat4 model = glm::scale(glm::mat4(1.0f), glm::vec3(0.15f));
 
-  // 设置project_matrix uniform
-
-  // glm::mat4 projection =
-  //     glm::perspective(glm::radians(60.0f), aspect, 0.1f, 100.0f);
-
-  float viewHeight = 720.0f;
-  float viewWidth = viewHeight * aspect;
+  model = glm::rotate(model, -roll_, glm::vec3(0.0f, 0.0f, 1.0f));
+  model = glm::translate(model,
+                         glm::vec3(position_x / 0.15, position_y / 0.15, 0.0f));
 
   // 修改为与 NDC 空间匹配的正交投影
-  float rt = (float)framebuffer_->GetHeight() / framebuffer_->GetWidth();
+  float aspect = (float)framebuffer_->GetHeight() / framebuffer_->GetWidth();
 
-  filter_program_->SetUniformValue("test", 0.0f);
-  glm::mat4 projection = glm::ortho(-1.0f, 1.0f, -rt, rt, -1.0f, 1.0f);
+  filter_program_->SetUniformValue("test", 0.6f);
+  glm::mat4 projection = glm::ortho(-1.0f, 1.0f, -aspect, aspect, -1.0f, 0.0f);
   filter_program_->SetUniformValue("projection", projection);
-  filter_program_->SetUniformValue("model", scale_matrix);
+  filter_program_->SetUniformValue("model", model);
 
   // 设置叠加纹理
   GL_CALL(glBindTexture(GL_TEXTURE_2D,
                         source_image_->GetFramebuffer()->GetTexture()));
+
+  float vert[] = {
+      -1.0f, -0.5f, 1.0f, -0.5f, -1.0f, 0.5f, 1.0f, 0.5f,
+  };
+
+  GL_CALL(glVertexAttribPointer(filter_position_attribute_, 2, GL_FLOAT, 0, 0,
+                                vert));
 
   GL_CALL(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
 
