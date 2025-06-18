@@ -93,30 +93,41 @@ bool TieZhiFilter::DoRender(bool updateSinks) {
   GL_CALL(glVertexAttribPointer(filter_position_attribute_, 2, GL_FLOAT, 0, 0,
                                 image_vertices));
   GL_CALL(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
+    // 修改为与 NDC 空间匹配的正交投影
+    float aspect = (float)framebuffer_->GetHeight() / framebuffer_->GetWidth();
 
   float position_x = 0.0f;
   float position_y = 0.0f;
 
   if (face_landmarks_.size() > 0) {
-    float x = face_landmarks_[43 * 2];      // x
-    float y = face_landmarks_[43 * 2 + 1];  // y
-    position_x = x * 2 - 1;
-    position_y = y * 2 - 1;
+    float ertou_x = face_landmarks_[43 * 2];      // x
+    float dis = face_landmarks_[49 * 2 + 1] - face_landmarks_[43 * 2 + 1];
+    float ertou_y = face_landmarks_[35 * 2 + 1] - 2*dis;  // y
+    position_x = ertou_x * 2 - 1; // [-1, 1]
+    position_y = ertou_y * 2 - 1; // [-1, 1]
   }
 
   LOG_INFO("pitch_ = {}, yaw_ = {}, roll_ = {}", pitch_, yaw_, roll_);
-  // 组合所有变换矩阵，注意变换顺序：先缩放，再旋转，最后平移
-  glm::mat4 model = glm::scale(glm::mat4(1.0f), glm::vec3(0.15f));
 
-  model = glm::rotate(model, -roll_, glm::vec3(0.0f, 0.0f, 1.0f));
-  model = glm::translate(model,
-                         glm::vec3(position_x / 0.15, position_y / 0.15, 0.0f));
+  glm::mat4 scale_matrix =
+      glm::scale(glm::mat4(1.0f), glm::vec3(0.2f, 0.1f, 1.0f));
 
-  // 修改为与 NDC 空间匹配的正交投影
-  float aspect = (float)framebuffer_->GetHeight() / framebuffer_->GetWidth();
+  static float angle = 0.0f;
+  angle += 1.0f;
+  glm::mat4 rotate_matrix = glm::rotate(glm::mat4(1.0f), -roll_,
+                                        glm::vec3(0.0f, 0.0f, 1.0f));
+
+  rotate_matrix = glm::rotate(rotate_matrix, pitch_, glm::vec3(1.0f, 0.0f, 0.0f));
+  rotate_matrix = glm::rotate(rotate_matrix, -yaw_, glm::vec3(0.0f, 1.0f, 0.0f));
+  glm::mat4 translate_matrix = glm::translate(
+      glm::mat4(1.0f), glm::vec3(position_x, position_y*aspect, 0.0f));
+
+  // 组合所有变换矩阵，注意变换顺序：先缩放，再旋转，最后平移（矩阵则从右向左的顺序生肖）
+//  glm::mat4 model = rotate_matrix * scale_matrix * translate_matrix;
+  glm::mat4 model = translate_matrix*rotate_matrix*scale_matrix;
 
   filter_program_->SetUniformValue("test", 0.6f);
-  glm::mat4 projection = glm::ortho(-1.0f, 1.0f, -aspect, aspect, -1.0f, 0.0f);
+  glm::mat4 projection = glm::ortho(-1.0f, 1.0f, -aspect, aspect, -1.0f, 1.0f);
   filter_program_->SetUniformValue("projection", projection);
   filter_program_->SetUniformValue("model", model);
 
@@ -128,8 +139,9 @@ bool TieZhiFilter::DoRender(bool updateSinks) {
       -1.0f, -0.5f, 1.0f, -0.5f, -1.0f, 0.5f, 1.0f, 0.5f,
   };
 
-  GL_CALL(glVertexAttribPointer(filter_position_attribute_, 2, GL_FLOAT, 0, 0,
-                                vert));
+  // GL_CALL(glVertexAttribPointer(filter_position_attribute_, 2, GL_FLOAT, 0,
+  // 0,
+  //                               vert));
 
   GL_CALL(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
 
