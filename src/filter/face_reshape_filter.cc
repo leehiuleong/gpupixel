@@ -121,54 +121,54 @@ const std::string kGPUPixelThinFaceFragmentShaderString = R"(
  uniform float thinFaceDelta;
  uniform float bigEyeDelta;
  
- // 基础矩形区域像素平移函数
+ // Basic rectangle area pixel translation function
  vec2 rectangleTranslate(vec2 textureCoord, vec2 rectTopLeft, vec2 rectBottomRight, vec2 translateOffset) {
-     // 检查当前像素是否在矩形框内
+     // Check if current pixel is within rectangle bounds
      bool inRect = (textureCoord.x >= rectTopLeft.x && textureCoord.x <= rectBottomRight.x) &&
                    (textureCoord.y >= rectTopLeft.y && textureCoord.y <= rectBottomRight.y);
      
      if (inRect) {
-         // 在矩形内，应用平移偏移
+         // Inside rectangle, apply translation offset
          return textureCoord + translateOffset;
      } else {
-         // 在矩形外，保持原坐标
+         // Outside rectangle, keep original coordinates
          return textureCoord;
      }
  }
 
 
- // 带平滑边缘的矩形区域像素平移函数  
+ // Rectangle area pixel translation function with smooth edges
  vec2 rectangleTranslateSmooth(vec2 textureCoord, vec2 rectCenter, vec2 rectSize, vec2 translateOffset, float smoothEdge) {
-     // 计算到矩形中心的相对坐标
+     // Calculate relative coordinates to rectangle center
      vec2 relativePos = abs(textureCoord - rectCenter);
      vec2 halfSize = rectSize * 0.5;
      
-     // 计算距离矩形边界的距离
+     // Calculate distance to rectangle boundary
      vec2 distToEdge = halfSize - relativePos;
      float minDistToEdge = min(distToEdge.x, distToEdge.y);
      
-     // 计算权重：在矩形内部权重为1，边缘平滑过渡
+     // Calculate weight: weight is 1 inside rectangle, smooth transition at edges
      float weight = smoothstep(0.0, smoothEdge, minDistToEdge);
      weight = clamp(weight, 0.0, 1.0);
      
-     // 应用加权的平移偏移
+     // Apply weighted translation offset
      return textureCoord + translateOffset * weight;
  }
  
- // 改进方案1：使用高斯函数的椭圆形区域平移（推荐用于嘴巴）
+ // Improved solution 1: Elliptical area translation using Gaussian function (recommended for mouth)
  vec2 ellipseTranslateGaussian(vec2 textureCoord, vec2 center, vec2 size, vec2 translateOffset, float intensity) {
-     // 计算标准化距离
+     // Calculate normalized distance
      vec2 relativePos = (textureCoord - center) / size;
      float distance = length(relativePos);
      
-     // 使用高斯函数计算权重，产生更自然的过渡
+     // Use Gaussian function to calculate weight, producing more natural transition
      float weight = exp(-distance * distance * 4.0) * intensity;
      weight = clamp(weight, 0.0, 1.0);
      
      return textureCoord + translateOffset * weight;
  }
  
- // 改进方案2：使用cosine插值的圆形区域平移
+ // Improved solution 2: Circular area translation using cosine interpolation
  vec2 circleTranslateCosine(vec2 textureCoord, vec2 center, float radius, vec2 translateOffset, float intensity) {
      float dist = distance(textureCoord, center);
      
@@ -176,7 +176,7 @@ const std::string kGPUPixelThinFaceFragmentShaderString = R"(
          return textureCoord;
      }
      
-     // 使用cosine插值产生S型曲线过渡
+     // Use cosine interpolation to produce S-curve transition
      float normalizedDist = dist / radius;
      float weight = 0.5 * (1.0 + cos(3.14159 * normalizedDist)) * intensity;
      weight = clamp(weight, 0.0, 1.0);
@@ -184,7 +184,7 @@ const std::string kGPUPixelThinFaceFragmentShaderString = R"(
      return textureCoord + translateOffset * weight;
  }
  
- // 改进方案3：多层次衰减的椭圆形平移（最自然的效果）
+ // Improved solution 3: Multi-layer decay elliptical translation (most natural effect)
  vec2 ellipseTranslateMultiLayer(vec2 textureCoord, vec2 center, vec2 size, vec2 translateOffset, float intensity) {
      vec2 relativePos = textureCoord - center;
      vec2 normalizedPos = relativePos / size;
@@ -194,17 +194,17 @@ const std::string kGPUPixelThinFaceFragmentShaderString = R"(
          return textureCoord;
      }
      
-     // 多层次衰减：内核区域+过渡区域+边缘区域
+     // Multi-layer decay: core area + transition area + edge area
      float weight = 0.0;
      if (ellipseDist < 0.3) {
-         // 内核区域：几乎完全平移
+         // Core area: almost complete translation
          weight = intensity * 0.95;
      } else if (ellipseDist < 0.7) {
-         // 主要过渡区域：smooth衰减
+         // Main transition area: smooth decay
          float t = (ellipseDist - 0.3) / 0.4;
          weight = intensity * (0.95 - 0.7 * smoothstep(0.0, 1.0, t));
      } else {
-         // 边缘过渡区域：快速衰减到0
+         // Edge transition area: rapid decay to 0
          float t = (ellipseDist - 0.7) / 0.3;
          weight = intensity * 0.25 * (1.0 - smoothstep(0.0, 1.0, t));
      }
@@ -241,7 +241,7 @@ const std::string kGPUPixelThinFaceFragmentShaderString = R"(
      return result;
  }
 
-// 瘦脸
+// Face slimming
  vec2 thinFace(vec2 currentCoordinate, int faceIndex) {
      int baseIndex = faceIndex * 222;
      vec2 faceIndexs[9];
@@ -266,8 +266,8 @@ const std::string kGPUPixelThinFaceFragmentShaderString = R"(
      return currentCoordinate;
  }
 
-// v脸
-  vec2 vFace(vec2 currentCoordinate, int faceIndex) {
+// V-shape face adjustment
+  vec2 vShapeFace(vec2 currentCoordinate, int faceIndex) {
      int baseIndex = faceIndex * 222;
      vec2 faceIndexs[4];
      faceIndexs[0] = vec2(10., 95.);
@@ -286,8 +286,8 @@ const std::string kGPUPixelThinFaceFragmentShaderString = R"(
      return currentCoordinate;
  }
 
-// 窄脸
-   vec2 zhaiFace(vec2 currentCoordinate, int faceIndex) {
+// Narrow face adjustment
+   vec2 narrowFace(vec2 currentCoordinate, int faceIndex) {
      int baseIndex = faceIndex * 222;
     
      vec2 faceIndexs[6];
@@ -310,7 +310,7 @@ const std::string kGPUPixelThinFaceFragmentShaderString = R"(
      return currentCoordinate;
  }
 
-// 短脸
+// Short face adjustment
    vec2 shortFace(vec2 currentCoordinate, int faceIndex) {
      int baseIndex = faceIndex * 222;
      vec2 faceIndexs[5];
@@ -331,8 +331,8 @@ const std::string kGPUPixelThinFaceFragmentShaderString = R"(
      return currentCoordinate;
  }
 
-// 颧骨
-    vec2 quanGu(vec2 currentCoordinate, int faceIndex) {
+// Cheekbone adjustment
+    vec2 adjustCheekbones(vec2 currentCoordinate, int faceIndex) {
      int baseIndex = faceIndex * 222;
       vec2 faceIndexs[6];
       faceIndexs[0] = vec2(3., 44.);
@@ -354,8 +354,8 @@ const std::string kGPUPixelThinFaceFragmentShaderString = R"(
      return currentCoordinate;
  }
 
-// 下颌骨
-  vec2 xiaheGu(vec2 currentCoordinate, int faceIndex) {
+// Jawbone adjustment
+  vec2 adjustJawbone(vec2 currentCoordinate, int faceIndex) {
      int baseIndex = faceIndex * 222;
       vec2 faceIndexs[8];
       faceIndexs[0] = vec2(7., 49.);
@@ -379,8 +379,8 @@ const std::string kGPUPixelThinFaceFragmentShaderString = R"(
  }
 
 
- // 下巴
-  vec2 xiaBa(vec2 currentCoordinate, int faceIndex) {
+ // Chin adjustment
+  vec2 adjustChin(vec2 currentCoordinate, int faceIndex) {
      int baseIndex = faceIndex * 222;
       vec2 faceIndexs[7];
       faceIndexs[0] = vec2(13., 82.);
@@ -402,8 +402,8 @@ const std::string kGPUPixelThinFaceFragmentShaderString = R"(
      return currentCoordinate;
  }
 
-  // 瘦鼻
-  vec2 shouBi(vec2 currentCoordinate, int faceIndex) {
+  // Nose slimming
+  vec2 slimNose(vec2 currentCoordinate, int faceIndex) {
      int baseIndex = faceIndex * 222;
       vec2 faceIndexs[6];
       faceIndexs[0] = vec2(80., 81.);
@@ -424,8 +424,8 @@ const std::string kGPUPixelThinFaceFragmentShaderString = R"(
      return currentCoordinate;
  }
 
-   // 嘴型（大小）
-  vec2 zuiXing(vec2 currentCoordinate, int faceIndex) {
+   // Mouth size adjustment
+  vec2 adjustMouthSize(vec2 currentCoordinate, int faceIndex) {
      int baseIndex = faceIndex * 222;
       vec2 faceIndexs[6];
       faceIndexs[0] = vec2(80., 81.);
@@ -446,44 +446,44 @@ const std::string kGPUPixelThinFaceFragmentShaderString = R"(
      return currentCoordinate;
  }
 
-    // 眼距调整 - 使用改进的椭圆形平移函数
-  vec2 yanju(vec2 currentCoordinate, int faceIndex) {
+    // Eye distance adjustment - using improved elliptical translation function
+  vec2 adjustEyeDistance(vec2 currentCoordinate, int faceIndex) {
      int baseIndex = faceIndex * 222;     
     
-    // left eye - 使用椭圆形高斯平移
+    // Left eye - using elliptical Gaussian translation
     vec2 leftCenter = vec2(facePoints[baseIndex + 74 * 2], facePoints[baseIndex + 74 * 2 + 1]);
-    vec2 eyeSize = vec2(0.08, 0.04);  // 缩小影响区域
+    vec2 eyeSize = vec2(0.08, 0.04);  // Reduce influence area
     currentCoordinate = ellipseTranslateGaussian(currentCoordinate, leftCenter, eyeSize, vec2(0.15, 0.0), thinFaceDelta);
     
-    // right eye - 使用椭圆形高斯平移
+    // Right eye - using elliptical Gaussian translation
     vec2 rightCenter = vec2(facePoints[baseIndex + 77 * 2], facePoints[baseIndex + 77 * 2 + 1]);
     currentCoordinate = ellipseTranslateGaussian(currentCoordinate, rightCenter, eyeSize, vec2(-0.15, 0.0), thinFaceDelta);
     
     return currentCoordinate;
  }
 
- // 嘴巴位置调整 - 使用改进的椭圆形平移函数
- vec2 zuiba_position(vec2 currentCoordinate, int faceIndex) {
+ // Mouth position adjustment - using improved elliptical translation function
+ vec2 adjustMouthPosition(vec2 currentCoordinate, int faceIndex) {
      int baseIndex = faceIndex * 222;     
  
     vec2 center = vec2(facePoints[baseIndex + 93 * 2], facePoints[baseIndex + 93 * 2 + 1]);
     
-    // 方案1：使用高斯椭圆形平移（推荐）
-    // vec2 size = vec2(0.1, 0.1);  // 稍微缩小影响区域
+    // Option 1: Using Gaussian elliptical translation (recommended)
+    // vec2 size = vec2(0.1, 0.1);  // Slightly reduce influence area
     // currentCoordinate = ellipseTranslateGaussian(currentCoordinate, center, size, vec2(0.0, -0.15), thinFaceDelta);
     
-         // 方案2：使用多层次椭圆形平移（最自然，可选）
-     vec2 size = vec2(0.15, 0.12);  // 微调椭圆大小以配合93号landmark
+         // Option 2: Using multi-layer elliptical translation (most natural, optional)
+     vec2 size = vec2(0.15, 0.12);  // Fine-tune ellipse size to match landmark 93
      currentCoordinate = ellipseTranslateMultiLayer(currentCoordinate, center, size, vec2(0.0, -0.10), thinFaceDelta);
     
-    // 方案3：使用圆形cosine平移（简单有效，可选）
+    // Option 3: Using circular cosine translation (simple and effective, optional)
     // float radius = 0.08;
     // currentCoordinate = circleTranslateCosine(currentCoordinate, center, radius, vec2(0.0, -0.12), thinFaceDelta);
  
     return currentCoordinate;
  }
  
-// 大眼
+// Eye enlargement
  vec2 bigEye(vec2 currentCoordinate, int faceIndex) {
      int baseIndex = faceIndex * 222;
 
@@ -512,7 +512,7 @@ const std::string kGPUPixelThinFaceFragmentShaderString = R"(
 
      for(int i = 0; i < faceCount; i++) {
         //  positionToUse = thinFace(positionToUse, i);
-         positionToUse = zuiba_position(positionToUse, i);
+         positionToUse = adjustMouthPosition(positionToUse, i);
          positionToUse = bigEye(positionToUse, i);
      }
 
