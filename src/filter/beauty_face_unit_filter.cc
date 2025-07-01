@@ -94,13 +94,17 @@ const std::string kGPUImageBaseBeautyFaceFragmentShaderString = R"(
 
       if (whiten > 0.0) {
         vec3 colorEPM = color;
-        color =
-            clamp((colorEPM - vec3(levelBlack)) * levelRangeInv, 0.0, 1.0);
+        // 让级别调整受到 whiten 参数控制
+        vec3 adjustedColor = clamp((colorEPM - vec3(levelBlack)) * levelRangeInv, 0.0, 1.0);
+        color = mix(colorEPM, adjustedColor, whiten);
+        
         vec3 texel = vec3(texture2D(lookUpGray, vec2(color.r, 0.5)).r,
                           texture2D(lookUpGray, vec2(color.g, 0.5)).g,
                           texture2D(lookUpGray, vec2(color.b, 0.5)).b);
-        texel = mix(color, texel, 0.5);
-        texel = mix(colorEPM, texel, alpha);
+        // 让灰度混合受到 whiten 参数控制
+        texel = mix(color, texel, 0.5 * whiten);
+        // 让最终混合受到 whiten 参数控制
+        texel = mix(colorEPM, texel, alpha * whiten);
 
         texel = clamp(texel, 0., 1.);
         float blueColor = texel.b * 15.0;
@@ -117,7 +121,8 @@ const std::string kGPUImageBaseBeautyFaceFragmentShaderString = R"(
         vec3 newColor2Origin = texture2D(lookUpOrigin, texPos2).rgb;
         vec3 colorOrigin =
             mix(newColor1Origin, newColor2Origin, fract(blueColor));
-        texel = mix(colorOrigin, color, alpha);
+        // 让原始查找表混合受到 whiten 参数控制
+        texel = mix(color, colorOrigin, alpha * whiten);
 
         texel = clamp(texel, 0., 1.);
         blueColor = texel.b * 15.0;
@@ -130,7 +135,9 @@ const std::string kGPUImageBaseBeautyFaceFragmentShaderString = R"(
         texPos2 = quad2 * 0.25 + texPos2;
         vec3 newColor1 = texture2D(lookUpSkin, texPos1).rgb;
         vec3 newColor2 = texture2D(lookUpSkin, texPos2).rgb;
-        color = mix(newColor1.rgb, newColor2.rgb, fract(blueColor));
+        vec3 skinColor = mix(newColor1.rgb, newColor2.rgb, fract(blueColor));
+        // 让皮肤查找表效果受到 whiten 参数控制
+        color = mix(color, skinColor, whiten);
         color = clamp(color, 0., 1.);
 
         highp float blueColor_custom = color.b * 63.0;
@@ -217,13 +224,17 @@ const std::string kGPUImageBaseBeautyFaceFragmentShaderString = R"(
       // whiten
       if (whiten > 0.0) {
         vec3 colorEPM = color;
-        color =
-            clamp((colorEPM - vec3(levelBlack)) * levelRangeInv, 0.0, 1.0);
+        // 让级别调整受到 whiten 参数控制
+        vec3 adjustedColor = clamp((colorEPM - vec3(levelBlack)) * levelRangeInv, 0.0, 1.0);
+        color = mix(colorEPM, adjustedColor, whiten);
+        
         vec3 texel = vec3(texture2D(lookUpGray, vec2(color.r, 0.5)).r,
                           texture2D(lookUpGray, vec2(color.g, 0.5)).g,
                           texture2D(lookUpGray, vec2(color.b, 0.5)).b);
-        texel = mix(color, texel, 0.5);
-        texel = mix(colorEPM, texel, alpha);
+        // 让灰度混合受到 whiten 参数控制
+        texel = mix(color, texel, 0.5 * whiten);
+        // 让最终混合受到 whiten 参数控制
+        texel = mix(colorEPM, texel, alpha * whiten);
 
         texel = clamp(texel, 0., 1.);
         float blueColor = texel.b * 15.0;
@@ -240,7 +251,8 @@ const std::string kGPUImageBaseBeautyFaceFragmentShaderString = R"(
         vec3 newColor2Origin = texture2D(lookUpOrigin, texPos2).rgb;
         vec3 colorOrigin =
             mix(newColor1Origin, newColor2Origin, fract(blueColor));
-        texel = mix(colorOrigin, color, alpha);
+        // 让原始查找表混合受到 whiten 参数控制
+        texel = mix(color, colorOrigin, alpha * whiten);
 
         texel = clamp(texel, 0., 1.);
         blueColor = texel.b * 15.0;
@@ -253,7 +265,9 @@ const std::string kGPUImageBaseBeautyFaceFragmentShaderString = R"(
         texPos2 = quad2 * 0.25 + texPos2;
         vec3 newColor1 = texture2D(lookUpSkin, texPos1).rgb;
         vec3 newColor2 = texture2D(lookUpSkin, texPos2).rgb;
-        color = mix(newColor1.rgb, newColor2.rgb, fract(blueColor));
+        vec3 skinColor = mix(newColor1.rgb, newColor2.rgb, fract(blueColor));
+        // 让皮肤查找表效果受到 whiten 参数控制
+        color = mix(color, skinColor, whiten);
         color = clamp(color, 0., 1.);
 
         float blueColor_custom = color.b * 63.0;
@@ -407,7 +421,7 @@ void BeautyFaceUnitFilter::SetBlurAlpha(float blur_alpha) {
 
 void BeautyFaceUnitFilter::SetWhite(float white) {
 #if defined(GPUPIXEL_MAC)
-  white_balance_ = white / 10;
+  white_balance_ = white / 2.5;
 #else
   white_balance_ = white;
 #endif
