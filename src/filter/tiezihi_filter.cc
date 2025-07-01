@@ -107,7 +107,7 @@ bool TieZhiFilter::DoRender(bool updateSinks) {
     position_y = ertou_y * 2 - 1; // [-1, 1]
   }
 
-  LOG_INFO("pitch_ = {}, yaw_ = {}, roll_ = {}", pitch_, yaw_, roll_);
+//  LOG_INFO("pitch_ = {}, yaw_ = {}, roll_ = {}", pitch_, yaw_, roll_);
 
   glm::mat4 scale_matrix =
       glm::scale(glm::mat4(1.0f), glm::vec3(0.2f, 0.1f, 1.0f));
