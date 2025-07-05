@@ -88,15 +88,15 @@ fs::path Util::GetResourcePath() {
   fs::path default_path = fs::current_path();
 #endif
   if (resource_root_path_.empty()) {
-    LOG_INFO("resource_root_path_ is empty, using default path: {}",
-             default_path.string());
+    FB_LOG_INFO("resource_root_path_ is empty, using default path: {}",
+                default_path.string());
     return default_path;
   }
   return resource_root_path_;
 }
 
 void Util::SetResourcePath(const fs::path& path) {
-  LOG_INFO("SetResourcePath: {}", path.string());
+  FB_LOG_INFO("SetResourcePath: {}", path.string());
   resource_root_path_ = path;
 }
 

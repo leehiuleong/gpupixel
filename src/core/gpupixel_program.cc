@@ -86,7 +86,7 @@ bool GPUPixelGLProgram::InitWithShaderString(
 #else
 
 #endif
-    LOG_ERROR(
+    FB_LOG_ERROR(
         "GL ERROR GPUPixelGLProgram::InitWithShaderString vertex shader {}",
         messages);
     return -1;
@@ -108,8 +108,9 @@ bool GPUPixelGLProgram::InitWithShaderString(
 #else
 
 #endif
-    LOG_ERROR("GL ERROR GPUPixelGLProgram::InitWithShaderString frag shader {}",
-              messages);
+    FB_LOG_ERROR(
+        "GL ERROR GPUPixelGLProgram::InitWithShaderString frag shader {}",
+        messages);
     return -1;
   }
 

@@ -36,7 +36,7 @@ std::shared_ptr<SourceImage> SourceImage::CreateFromEncodedData(
     const uint8_t* image_data,
     size_t data_size) {
   if (!image_data || data_size == 0) {
-    LOG_ERROR("SourceImage: Invalid image data or size");
+    FB_LOG_ERROR("SourceImage: Invalid image data or size");
     return nullptr;
   }
 
@@ -47,12 +47,12 @@ std::shared_ptr<SourceImage> SourceImage::CreateFromEncodedData(
       );
 
   if (!decoded_data) {
-    LOG_ERROR("stbi_load_from_memory failed to decode image data");
+    FB_LOG_ERROR("stbi_load_from_memory failed to decode image data");
     return nullptr;
   }
 
-  LOG_INFO("create source image from buffer: {}x{}, channels: {}", width,
-           height, channels);
+  FB_LOG_INFO("create source image from buffer: {}x{}, channels: {}", width,
+              height, channels);
 
   auto image = SourceImage::CreateFromPixelData(width, height, 4, decoded_data);
   stbi_image_free(decoded_data);
@@ -62,16 +62,16 @@ std::shared_ptr<SourceImage> SourceImage::CreateFromEncodedData(
 
 std::shared_ptr<SourceImage> SourceImage::Create(const std::string path) {
   if (!fs::exists(path)) {
-    LOG_ERROR("SourceImage: image path not found: {}", path);
+    FB_LOG_ERROR("SourceImage: image path not found: {}", path);
     assert(false && "SourceImage: image path not found");
     return nullptr;
   }
   int width, height, channel_count;
   unsigned char* data =
       stbi_load(path.c_str(), &width, &height, &channel_count, 4);
-  LOG_INFO("create source image path: {}", path);
+  FB_LOG_INFO("create source image path: {}", path);
   if (data == nullptr) {
-    LOG_ERROR("stbi_load create image failed! file path: {}", path);
+    FB_LOG_ERROR("stbi_load create image failed! file path: {}", path);
     assert(data != nullptr && "stbi_load create image failed");
     return nullptr;
   }

@@ -31,12 +31,12 @@ extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved) {
 
   // Get JNIEnv
   if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
-    LOG_ERROR("JNI_OnLoad failed to get the environment");
+    FB_LOG_ERROR("JNI_OnLoad failed to get the environment");
     return JNI_ERR;
   }
 
   // Set JavaVM pointer using SetJVM function in jni_helpers.h
-  LOG_INFO("Setting JavaVM pointer in JNI_OnLoad");
+  FB_LOG_INFO("Setting JavaVM pointer in JNI_OnLoad");
   SetJVM(vm);
 
   // Return JNI version
@@ -70,7 +70,7 @@ Java_com_pixpark_gpupixel_GPUPixel_nativeYUV420ToRGBA(JNIEnv* env,
   jbyte* rgba_data = env->GetByteArrayElements(rgba_out, nullptr);
 
   if (!y_data || !u_data || !v_data || !rgba_data) {
-    LOG_ERROR("Failed to get buffer addresses");
+    FB_LOG_ERROR("Failed to get buffer addresses");
     if (rgba_data) {
       env->ReleaseByteArrayElements(rgba_out, rgba_data, 0);
     }
@@ -82,7 +82,7 @@ Java_com_pixpark_gpupixel_GPUPixel_nativeYUV420ToRGBA(JNIEnv* env,
     // Create temporary NV12/NV21 buffer (Y plane and interleaved UV plane)
     uint8_t* nv21_data = new uint8_t[width * height * 3 / 2];
     if (!nv21_data) {
-      LOG_ERROR("Memory allocation failed");
+      FB_LOG_ERROR("Memory allocation failed");
       env->ReleaseByteArrayElements(rgba_out, rgba_data, 0);
       return;
     }
@@ -120,7 +120,7 @@ Java_com_pixpark_gpupixel_GPUPixel_nativeYUV420ToRGBA(JNIEnv* env,
     std::stringstream ss;
     ss << "Non-standard pixel stride: Y=" << y_pixel_stride
        << " U=" << u_pixel_stride << " V=" << v_pixel_stride;
-    LOG_INFO("{}", ss.str());
+    FB_LOG_INFO("{}", ss.str());
 
     // Create temporary buffers
     uint8_t* y_plane = new uint8_t[width * height];
@@ -128,7 +128,7 @@ Java_com_pixpark_gpupixel_GPUPixel_nativeYUV420ToRGBA(JNIEnv* env,
     uint8_t* v_plane = new uint8_t[width * height / 4];
 
     if (!y_plane || !u_plane || !v_plane) {
-      LOG_ERROR("Memory allocation failed");
+      FB_LOG_ERROR("Memory allocation failed");
       delete[] y_plane;
       delete[] u_plane;
       delete[] v_plane;
@@ -193,7 +193,7 @@ Java_com_pixpark_gpupixel_GPUPixel_nativeRotateRGBA(JNIEnv* env,
   jbyte* rgba_out_data = env->GetByteArrayElements(rgba_out, nullptr);
 
   if (!rgba_in_data || !rgba_out_data) {
-    LOG_ERROR("Failed to get array elements");
+    FB_LOG_ERROR("Failed to get array elements");
     if (rgba_in_data) {
       env->ReleaseByteArrayElements(rgba_in, rgba_in_data, JNI_ABORT);
     }
@@ -278,7 +278,7 @@ Java_com_pixpark_gpupixel_GPUPixel_nativeRotateRGBA(JNIEnv* env,
     default: {
       std::stringstream ss;
       ss << "Unsupported rotation angle: " << rotation_degrees;
-      LOG_ERROR("{}", ss.str());
+      FB_LOG_ERROR("{}", ss.str());
     }
       memcpy(dst, src, width * height * 4);
       break;
@@ -297,14 +297,14 @@ Java_com_pixpark_gpupixel_GPUPixel_nativeSetResourcePath(JNIEnv* env,
                                                          jclass clazz,
                                                          jstring path) {
   if (path == nullptr) {
-    LOG_ERROR("Resource path is null");
+    FB_LOG_ERROR("Resource path is null");
     return;
   }
 
   // Convert Java string to C++ string
   const char* c_path = env->GetStringUTFChars(path, nullptr);
   if (c_path == nullptr) {
-    LOG_ERROR("Failed to get string characters");
+    FB_LOG_ERROR("Failed to get string characters");
     return;
   }
 
@@ -316,5 +316,5 @@ Java_com_pixpark_gpupixel_GPUPixel_nativeSetResourcePath(JNIEnv* env,
 
   std::stringstream ss;
   ss << "Set resource path to: " << c_path;
-  LOG_INFO("{}", ss.str());
+  FB_LOG_INFO("{}", ss.str());
 }

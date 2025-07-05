@@ -56,6 +56,8 @@ const std::string kGPUImageBaseBeautyFaceFragmentShaderString = R"(
     uniform highp float sharpen;
     uniform highp float blurAlpha;
     uniform highp float whiten;
+    uniform highp float warmth;
+    uniform highp float ruddy;
 
     const float levelRangeInv = 1.02657;
     const float levelBlack = 0.0258820;
@@ -162,6 +164,35 @@ const std::string kGPUImageBaseBeautyFaceFragmentShaderString = R"(
         vec3 color_custom =
             mix(newColor1, newColor2, fract(blueColor_custom));
         color = mix(color, color_custom, whiten);
+        
+        // 应用色温调整（暖白/冷白效果）
+        if (abs(warmth) > 0.001) {
+          vec3 warmColor = color;
+          if (warmth > 0.0) {
+            // 暖白：增加红色和绿色，减少蓝色
+            warmColor.r = color.r + warmth * 0.1;
+            warmColor.g = color.g + warmth * 0.05;
+            warmColor.b = color.b - warmth * 0.05;
+          } else {
+            // 冷白：增加蓝色，减少红色和绿色
+            warmColor.r = color.r + warmth * 0.05;
+            warmColor.g = color.g + warmth * 0.03;
+            warmColor.b = color.b - warmth * 0.08;
+          }
+          color = clamp(warmColor, 0.0, 1.0);
+        }
+        
+        // 应用红润效果
+        if (ruddy > 0.001) {
+          vec3 ruddyColor = color;
+          // 增加红色通道，营造红润效果
+          ruddyColor.r = color.r + ruddy * 0.15;
+          // 适当增加绿色通道，让红润更自然
+          ruddyColor.g = color.g + ruddy * 0.08;
+          // 稍微减少蓝色通道，增强暖红色调
+          ruddyColor.b = color.b - ruddy * 0.03;
+          color = clamp(ruddyColor, 0.0, 1.0);
+        }
       }
 
       gl_FragColor = vec4(color, 1.0);
@@ -184,6 +215,8 @@ const std::string kGPUImageBaseBeautyFaceFragmentShaderString = R"(
     uniform float sharpen;
     uniform float blurAlpha;
     uniform float whiten;
+    uniform float warmth;
+    uniform float ruddy;
 
     const float levelRangeInv = 1.02657;
     const float levelBlack = 0.0258820;
@@ -292,6 +325,35 @@ const std::string kGPUImageBaseBeautyFaceFragmentShaderString = R"(
         vec3 color_custom =
             mix(newColor1, newColor2, fract(blueColor_custom));
         color = mix(color, color_custom, whiten);
+        
+        // 应用色温调整（暖白/冷白效果）
+        if (abs(warmth) > 0.001) {
+          vec3 warmColor = color;
+          if (warmth > 0.0) {
+            // 暖白：增加红色和绿色，减少蓝色
+            warmColor.r = color.r + warmth * 0.1;
+            warmColor.g = color.g + warmth * 0.05;
+            warmColor.b = color.b - warmth * 0.05;
+          } else {
+            // 冷白：增加蓝色，减少红色和绿色
+            warmColor.r = color.r + warmth * 0.05;
+            warmColor.g = color.g + warmth * 0.03;
+            warmColor.b = color.b - warmth * 0.08;
+          }
+          color = clamp(warmColor, 0.0, 1.0);
+        }
+        
+        // 应用红润效果
+        if (ruddy > 0.001) {
+          vec3 ruddyColor = color;
+          // 增加红色通道，营造红润效果
+          ruddyColor.r = color.r + ruddy * 0.15;
+          // 适当增加绿色通道，让红润更自然
+          ruddyColor.g = color.g + ruddy * 0.08;
+          // 稍微减少蓝色通道，增强暖红色调
+          ruddyColor.b = color.b - ruddy * 0.03;
+          color = clamp(ruddyColor, 0.0, 1.0);
+        }
       }
       
       gl_FragColor = vec4(color, 1.0);
@@ -402,6 +464,8 @@ bool BeautyFaceUnitFilter::DoRender(bool updateSinks) {
   filter_program_->SetUniformValue("sharpen", sharpen_factor_);
   filter_program_->SetUniformValue("blurAlpha", blur_alpha_);
   filter_program_->SetUniformValue("whiten", white_balance_);
+  filter_program_->SetUniformValue("warmth", white_warmth_);
+  filter_program_->SetUniformValue("ruddy", ruddy_factor_);
 
   // draw
   GL_CALL(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
@@ -419,12 +483,19 @@ void BeautyFaceUnitFilter::SetBlurAlpha(float blur_alpha) {
   blur_alpha_ = blur_alpha;
 }
 
-void BeautyFaceUnitFilter::SetWhite(float white) {
-#if defined(GPUPIXEL_MAC)
-  white_balance_ = white / 2.5;
-#else
-  white_balance_ = white;
-#endif
+void BeautyFaceUnitFilter::SetWhite(float white, float warmth) {
+  // #if defined(GPUPIXEL_MAC)
+  //   white_balance_ = white / 2.5;
+  // #else
+  //   white_balance_ = white;
+  // #endif
+  //   white_warmth_ = warmth;
+  white_balance_ = 0.2;
+  ruddy_factor_ = white;
+}
+
+void BeautyFaceUnitFilter::SetRuddy(float ruddy) {
+  ruddy_factor_ = ruddy;
 }
 
 }  // namespace gpupixel

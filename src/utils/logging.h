@@ -19,31 +19,31 @@ std::string gpupixel_format(const std::string& fmt, Args... args) {
 }
 
 // clang-format off
-#define LOG_TRACE(...)                                                                \
+#define FB_LOG_TRACE(...)                                                                \
   do {                                                                                \
   } while (0)
 
-#define LOG_DEBUG(...)                                                                \
+#define FB_LOG_DEBUG(...)                                                                \
   do {                                                                                \
     std::cout << "[GPUPixel][ DEBUG ] " << gpupixel_format(__VA_ARGS__) << std::endl; \
   } while (0)
 
-#define LOG_INFO(...)                                                                 \
+#define FB_LOG_INFO(...)                                                                 \
   do {                                                                                \
     std::cout << "[GPUPixel][ INFO  ] " << gpupixel_format(__VA_ARGS__) << std::endl; \
   } while (0)
 
-#define LOG_WARN(...)                                                                 \
+#define FB_LOG_WARN(...)                                                                 \
   do {                                                                                \
     std::cout << "[GPUPixel][ WARN  ] " << gpupixel_format(__VA_ARGS__) << std::endl; \
   } while (0)
 
-#define LOG_ERROR(...)                                                                \
+#define FB_LOG_ERROR(...)                                                                \
   do {                                                                                \
     std::cout << "[GPUPixel][ERROR  ] " << gpupixel_format(__VA_ARGS__) << std::endl; \
   } while (0)
 
-#define LOG_CRITICAL(...)                                                             \
+#define FB_LOG_CRITICAL(...)                                                             \
   do {                                                                                \
     std::cout << "[GPUPixel][ CRIT ] " << gpupixel_format(__VA_ARGS__) << std::endl;  \
   } while (0)

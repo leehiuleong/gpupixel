@@ -58,7 +58,7 @@
         case GL_OUT_OF_MEMORY:    errorString = "GL_OUT_OF_MEMORY";     break;  \
         default:                  errorString = "Unknown GL Error";     break;  \
       }                                                                         \
-      LOG_ERROR("[{} {}:{}] GL ERROR: 0x{:04X} MSG: {}", __FILE__,              \
+      FB_LOG_ERROR("[{} {}:{}] GL ERROR: 0x{:04X} MSG: {}", __FILE__,              \
                 __FUNCTION__, __LINE__, e, errorString.c_str());                \
     }                                                                           \
   } while (0)

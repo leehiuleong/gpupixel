@@ -20,7 +20,7 @@ GPUPixelContext* GPUPixelContext::instance_ = 0;
 std::mutex GPUPixelContext::mutex_;
 
 GPUPixelContext::GPUPixelContext() : current_shader_program_(0) {
-  LOG_DEBUG("Creating GPUPixelContext");
+  FB_LOG_DEBUG("Creating GPUPixelContext");
 #if !defined(GPUPIXEL_WASM)
   task_queue_ = std::make_shared<DispatchQueue>();
 #endif
@@ -29,7 +29,7 @@ GPUPixelContext::GPUPixelContext() : current_shader_program_(0) {
 }
 
 GPUPixelContext::~GPUPixelContext() {
-  LOG_DEBUG("Destroying GPUPixelContext");
+  FB_LOG_DEBUG("Destroying GPUPixelContext");
   ReleaseContext();
   delete framebuffer_factory_;
   task_queue_->stop();
@@ -54,7 +54,7 @@ void GPUPixelContext::Destroy() {
 
 void GPUPixelContext::Init() {
   SyncRunWithContext([=] {
-    LOG_INFO("Initializing GPUPixelContext");
+    FB_LOG_INFO("Initializing GPUPixelContext");
     this->CreateContext();
   });
 }
@@ -71,22 +71,22 @@ void GPUPixelContext::SetActiveGlProgram(GPUPixelGLProgram* shaderProgram) {
 }
 
 void GPUPixelContext::Clean() {
-  LOG_DEBUG("Cleaning GPUPixelContext resources");
+  FB_LOG_DEBUG("Cleaning GPUPixelContext resources");
   framebuffer_factory_->Clean();
 }
 
 void GPUPixelContext::CreateContext() {
 #if defined(GPUPIXEL_IOS)
-  LOG_DEBUG("Creating iOS OpenGL ES 2.0 context");
+  FB_LOG_DEBUG("Creating iOS OpenGL ES 2.0 context");
   egl_context_ = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
   if (!egl_context_) {
-    LOG_ERROR("Failed to create iOS OpenGL ES 2.0 context");
+    FB_LOG_ERROR("Failed to create iOS OpenGL ES 2.0 context");
     return;
   }
   [EAGLContext setCurrentContext:egl_context_];
-  LOG_INFO("iOS OpenGL ES 2.0 context created successfully");
+  FB_LOG_INFO("iOS OpenGL ES 2.0 context created successfully");
 #elif defined(GPUPIXEL_MAC)
-  LOG_DEBUG("Creating macOS OpenGL context");
+  FB_LOG_DEBUG("Creating macOS OpenGL context");
   NSOpenGLPixelFormatAttribute pixelFormatAttributes[] = {
       NSOpenGLPFADoubleBuffer,
       NSOpenGLPFAOpenGLProfile,
@@ -104,14 +104,14 @@ void GPUPixelContext::CreateContext() {
   pixel_format_ =
       [[NSOpenGLPixelFormat alloc] initWithAttributes:pixelFormatAttributes];
   if (!pixel_format_) {
-    LOG_ERROR("Failed to create NSOpenGLPixelFormat");
+    FB_LOG_ERROR("Failed to create NSOpenGLPixelFormat");
     return;
   }
 
   image_processing_context_ =
       [[NSOpenGLContext alloc] initWithFormat:pixel_format_ shareContext:nil];
   if (!image_processing_context_) {
-    LOG_ERROR("Failed to create NSOpenGLContext");
+    FB_LOG_ERROR("Failed to create NSOpenGLContext");
     return;
   }
 
@@ -119,22 +119,22 @@ void GPUPixelContext::CreateContext() {
   [image_processing_context_ makeCurrentContext];
   [image_processing_context_ setValues:&interval
                           forParameter:NSOpenGLContextParameterSwapInterval];
-  LOG_INFO("macOS OpenGL context created successfully");
+  FB_LOG_INFO("macOS OpenGL context created successfully");
 #elif defined(GPUPIXEL_ANDROID)
-  LOG_DEBUG("Creating Android EGL context");
+  FB_LOG_DEBUG("Creating Android EGL context");
   // Initialize EGL
   egl_display_ = eglGetDisplay(EGL_DEFAULT_DISPLAY);
   if (egl_display_ == EGL_NO_DISPLAY) {
-    LOG_ERROR("Failed to get EGL display");
+    FB_LOG_ERROR("Failed to get EGL display");
     return;
   }
 
   EGLint major, minor;
   if (!eglInitialize(egl_display_, &major, &minor)) {
-    LOG_ERROR("Failed to initialize EGL");
+    FB_LOG_ERROR("Failed to initialize EGL");
     return;
   }
-  LOG_DEBUG("EGL initialized: version major:{} minor:{}", major, minor);
+  FB_LOG_DEBUG("EGL initialized: version major:{} minor:{}", major, minor);
 
   // Configure EGL
   const EGLint configAttribs[] = {EGL_RED_SIZE,
@@ -158,7 +158,7 @@ void GPUPixelContext::CreateContext() {
   EGLint numConfigs;
   if (!eglChooseConfig(egl_display_, configAttribs, &egl_config_, 1,
                        &numConfigs)) {
-    LOG_ERROR("Failed to choose EGL config");
+    FB_LOG_ERROR("Failed to choose EGL config");
     return;
   }
 
@@ -168,7 +168,7 @@ void GPUPixelContext::CreateContext() {
   egl_context_ = eglCreateContext(egl_display_, egl_config_, EGL_NO_CONTEXT,
                                   contextAttribs);
   if (egl_context_ == EGL_NO_CONTEXT) {
-    LOG_ERROR("Failed to create EGL context");
+    FB_LOG_ERROR("Failed to create EGL context");
     return;
   }
 
@@ -178,18 +178,18 @@ void GPUPixelContext::CreateContext() {
   egl_surface_ =
       eglCreatePbufferSurface(egl_display_, egl_config_, pbufferAttribs);
   if (egl_surface_ == EGL_NO_SURFACE) {
-    LOG_ERROR("Failed to create EGL surface");
+    FB_LOG_ERROR("Failed to create EGL surface");
     return;
   }
 
   // Set current context
   if (!eglMakeCurrent(egl_display_, egl_surface_, egl_surface_, egl_context_)) {
-    LOG_ERROR("Failed to make EGL context current");
+    FB_LOG_ERROR("Failed to make EGL context current");
     return;
   }
-  LOG_INFO("Android EGL context created successfully");
+  FB_LOG_INFO("Android EGL context created successfully");
 #elif defined(GPUPIXEL_WIN) || defined(GPUPIXEL_LINUX)
-  LOG_DEBUG("Creating Windows/Linux OpenGL context");
+  FB_LOG_DEBUG("Creating Windows/Linux OpenGL context");
   int ret = glfwInit();
 
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -198,61 +198,61 @@ void GPUPixelContext::CreateContext() {
   if (ret) {
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
   } else {
-    LOG_ERROR("Failed to initialize GLFW");
+    FB_LOG_ERROR("Failed to initialize GLFW");
     return;
   }
   gl_context_ = glfwCreateWindow(1, 1, "gpupixel opengl context", NULL, NULL);
   if (!gl_context_) {
-    LOG_ERROR("Failed to create GLFW window");
+    FB_LOG_ERROR("Failed to create GLFW window");
     glfwTerminate();
     return;
   }
   glfwMakeContextCurrent(gl_context_);
 
   if (!gladLoadGL()) {
-    LOG_ERROR("Failed to initialize GLAD");
+    FB_LOG_ERROR("Failed to initialize GLAD");
     return;
   }
-  LOG_INFO("Windows/Linux OpenGL context created successfully");
+  FB_LOG_INFO("Windows/Linux OpenGL context created successfully");
 #elif defined(GPUPIXEL_WASM)
-  LOG_DEBUG("Creating WebGL context");
+  FB_LOG_DEBUG("Creating WebGL context");
   EmscriptenWebGLContextAttributes attrs;
   emscripten_webgl_init_context_attributes(&attrs);
   attrs.majorVersion = 2;  // Use WebGL 2.0
   attrs.minorVersion = 0;
   wasm_context_ = emscripten_webgl_create_context("#gpupixel_canvas", &attrs);
   if (wasm_context_ <= 0) {
-    LOG_ERROR("Failed to create WebGL context: {}", wasm_context_);
+    FB_LOG_ERROR("Failed to create WebGL context: {}", wasm_context_);
     return;
   }
   emscripten_webgl_make_context_current(wasm_context_);
-  LOG_INFO("WebGL context created successfully");
+  FB_LOG_INFO("WebGL context created successfully");
 #endif
 }
 
 void GPUPixelContext::UseAsCurrent() {
 #if defined(GPUPIXEL_IOS)
   if ([EAGLContext currentContext] != egl_context_) {
-    LOG_TRACE("Setting current EAGLContext");
+    FB_LOG_TRACE("Setting current EAGLContext");
     [EAGLContext setCurrentContext:egl_context_];
   }
 #elif defined(GPUPIXEL_MAC)
   if ([NSOpenGLContext currentContext] != image_processing_context_) {
-    LOG_TRACE("Setting current NSOpenGLContext");
+    FB_LOG_TRACE("Setting current NSOpenGLContext");
     [image_processing_context_ makeCurrentContext];
   }
 #elif defined(GPUPIXEL_ANDROID)
   if (eglGetCurrentContext() != egl_context_) {
-    LOG_TRACE("Setting current EGL context");
+    FB_LOG_TRACE("Setting current EGL context");
     eglMakeCurrent(egl_display_, egl_surface_, egl_surface_, egl_context_);
   }
 #elif defined(GPUPIXEL_WIN) || defined(GPUPIXEL_LINUX)
   if (glfwGetCurrentContext() != gl_context_) {
-    LOG_TRACE("Setting current GLFW context");
+    FB_LOG_TRACE("Setting current GLFW context");
     glfwMakeContextCurrent(gl_context_);
   }
 #elif defined(GPUPIXEL_WASM)
-  LOG_TRACE("Setting current WebGL context");
+  FB_LOG_TRACE("Setting current WebGL context");
   emscripten_webgl_make_context_current(wasm_context_);
 #endif
 }
@@ -270,40 +270,40 @@ void GPUPixelContext::PresentBufferForDisplay() {
 }
 
 void GPUPixelContext::ReleaseContext() {
-  LOG_DEBUG("Releasing OpenGL context");
+  FB_LOG_DEBUG("Releasing OpenGL context");
 #if defined(GPUPIXEL_ANDROID)
   if (egl_display_ != EGL_NO_DISPLAY) {
     eglMakeCurrent(egl_display_, EGL_NO_SURFACE, EGL_NO_SURFACE,
                    EGL_NO_CONTEXT);
 
     if (egl_surface_ != EGL_NO_SURFACE) {
-      LOG_TRACE("Destroying EGL surface");
+      FB_LOG_TRACE("Destroying EGL surface");
       eglDestroySurface(egl_display_, egl_surface_);
       egl_surface_ = EGL_NO_SURFACE;
     }
 
     if (egl_context_ != EGL_NO_CONTEXT) {
-      LOG_TRACE("Destroying EGL context");
+      FB_LOG_TRACE("Destroying EGL context");
       eglDestroyContext(egl_display_, egl_context_);
       egl_context_ = EGL_NO_CONTEXT;
     }
 
-    LOG_TRACE("Terminating EGL display");
+    FB_LOG_TRACE("Terminating EGL display");
     eglTerminate(egl_display_);
     egl_display_ = EGL_NO_DISPLAY;
   }
 #elif defined(GPUPIXEL_WIN) || defined(GPUPIXEL_LINUX)
   if (gl_context_) {
-    LOG_TRACE("Destroying GLFW window");
+    FB_LOG_TRACE("Destroying GLFW window");
     glfwDestroyWindow(gl_context_);
   }
-  LOG_TRACE("Terminating GLFW");
+  FB_LOG_TRACE("Terminating GLFW");
   glfwTerminate();
 #elif defined(GPUPIXEL_WASM)
-  LOG_TRACE("Destroying WebGL context");
+  FB_LOG_TRACE("Destroying WebGL context");
   emscripten_webgl_destroy_context(wasm_context_);
 #endif
-  LOG_INFO("OpenGL context released successfully");
+  FB_LOG_INFO("OpenGL context released successfully");
 }
 
 void GPUPixelContext::SyncRunWithContext(std::function<void(void)> task) {
@@ -314,11 +314,11 @@ void GPUPixelContext::SyncRunWithContext(std::function<void(void)> task) {
 #endif
 
 #if defined(GPUPIXEL_WASM)
-  LOG_TRACE("Running task synchronously (WebGL)");
+  FB_LOG_TRACE("Running task synchronously (WebGL)");
   UseAsCurrent();
   task();
 #else
-  LOG_TRACE("Running task on task queue");
+  FB_LOG_TRACE("Running task on task queue");
   task_queue_->runTask([=]() {
     UseAsCurrent();
     task();

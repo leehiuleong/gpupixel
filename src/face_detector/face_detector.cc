@@ -25,7 +25,7 @@ FaceDetector::FaceDetector() {
   if (fs::exists(path)) {
     mars_face_detector_->Init(path.string());
   } else {
-    LOG_ERROR("FaceDetector: models path not found: {}", path.string());
+    FB_LOG_ERROR("FaceDetector: models path not found: {}", path.string());
     assert(false && "FaceDetector: models path not found");
   }
 }

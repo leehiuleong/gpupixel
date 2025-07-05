@@ -101,7 +101,7 @@ void SinkRender::Render() {
   GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 
   if (view_width_ == 0 || view_height_ == 0) {
-    LOG_WARN("SinkRender: view_width_ or view_height_ is 0");
+    FB_LOG_WARN("SinkRender: view_width_ or view_height_ is 0");
     return;
   }
   GL_CALL(glViewport(0, 0, view_width_, view_height_));

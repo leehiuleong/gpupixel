@@ -369,11 +369,11 @@ bool Filter::RegisterProperty(
 bool Filter::SetProperty(const std::string& name, int value) {
   Property* raw_property = GetProperty(name);
   if (!raw_property) {
-    LOG_WARN("Filter::setProperty invalid property {}", name);
+    FB_LOG_WARN("Filter::setProperty invalid property {}", name);
     return false;
   } else if (raw_property->type != "int") {
-    LOG_WARN("Filter::setProperty The property type is expected to be {}",
-             raw_property->type);
+    FB_LOG_WARN("Filter::setProperty The property type is expected to be {}",
+                raw_property->type);
     return false;
   }
   IntProperty* property = ((IntProperty*)raw_property);
@@ -387,11 +387,11 @@ bool Filter::SetProperty(const std::string& name, int value) {
 bool Filter::SetProperty(const std::string& name, float value) {
   Property* raw_property = GetProperty(name);
   if (!raw_property) {
-    LOG_WARN("Filter::setProperty invalid property {}", name);
+    FB_LOG_WARN("Filter::setProperty invalid property {}", name);
     return false;
   } else if (raw_property->type != "float") {
-    LOG_WARN("Filter::setProperty The property type is expected to be {}",
-             raw_property->type);
+    FB_LOG_WARN("Filter::setProperty The property type is expected to be {}",
+                raw_property->type);
     return false;
   }
   FloatProperty* property = ((FloatProperty*)raw_property);
@@ -406,11 +406,11 @@ bool Filter::SetProperty(const std::string& name, float value) {
 bool Filter::SetProperty(const std::string& name, std::vector<float> value) {
   Property* raw_property = GetProperty(name);
   if (!raw_property) {
-    LOG_WARN("Filter::setProperty invalid property {}", name);
+    FB_LOG_WARN("Filter::setProperty invalid property {}", name);
     return false;
   } else if (raw_property->type != "vector") {
-    LOG_WARN("Filter::setProperty The property type is expected to be {}",
-             raw_property->type);
+    FB_LOG_WARN("Filter::setProperty The property type is expected to be {}",
+                raw_property->type);
     return false;
   }
   VectorProperty* property = ((VectorProperty*)raw_property);
@@ -425,11 +425,11 @@ bool Filter::SetProperty(const std::string& name, std::vector<float> value) {
 bool Filter::SetProperty(const std::string& name, std::string value) {
   Property* raw_property = GetProperty(name);
   if (!raw_property) {
-    LOG_WARN("Filter::setProperty invalid property {}", name);
+    FB_LOG_WARN("Filter::setProperty invalid property {}", name);
     return false;
   } else if (raw_property->type != "string") {
-    LOG_WARN("Filter::setProperty The property type is expected to be {}",
-             raw_property->type);
+    FB_LOG_WARN("Filter::setProperty The property type is expected to be {}",
+                raw_property->type);
     return false;
   }
   StringProperty* property = ((StringProperty*)raw_property);

@@ -24,12 +24,12 @@ Java_com_pixpark_gpupixel_GPUPixelSource_nativeAddSink(
     jboolean is_sink_filter,
     jboolean is_source_filter) {
   if (source_id == 0) {
-    LOG_ERROR("nativeAddSink - Invalid parameter: source_id is 0");
+    FB_LOG_ERROR("nativeAddSink - Invalid parameter: source_id is 0");
     return 0;
   }
 
   if (sink_id == 0) {
-    LOG_ERROR("nativeAddSink - Invalid parameter: sink_id is 0");
+    FB_LOG_ERROR("nativeAddSink - Invalid parameter: sink_id is 0");
     return 0;
   }
 
@@ -40,12 +40,13 @@ Java_com_pixpark_gpupixel_GPUPixelSource_nativeAddSink(
     // If source is a Filter type
     auto* filter_ptr = reinterpret_cast<std::shared_ptr<Filter>*>(source_id);
     if (!filter_ptr) {
-      LOG_ERROR("nativeAddSink - source filter_ptr is null, conversion failed");
+      FB_LOG_ERROR(
+          "nativeAddSink - source filter_ptr is null, conversion failed");
       return 0;
     }
 
     if (!*filter_ptr) {
-      LOG_ERROR(
+      FB_LOG_ERROR(
           "nativeAddSink - *source filter_ptr is null, invalid Filter object");
       return 0;
     }
@@ -55,12 +56,13 @@ Java_com_pixpark_gpupixel_GPUPixelSource_nativeAddSink(
     // If it's a regular Source type
     auto* source_ptr = reinterpret_cast<std::shared_ptr<Source>*>(source_id);
     if (!source_ptr) {
-      LOG_ERROR("nativeAddSink - source_ptr is null, conversion failed");
+      FB_LOG_ERROR("nativeAddSink - source_ptr is null, conversion failed");
       return 0;
     }
 
     if (!*source_ptr) {
-      LOG_ERROR("nativeAddSink - *source_ptr is null, invalid Source object");
+      FB_LOG_ERROR(
+          "nativeAddSink - *source_ptr is null, invalid Source object");
       return 0;
     }
 
@@ -74,12 +76,13 @@ Java_com_pixpark_gpupixel_GPUPixelSource_nativeAddSink(
     // If it's a Filter type
     auto* filter_ptr = reinterpret_cast<std::shared_ptr<Filter>*>(sink_id);
     if (!filter_ptr) {
-      LOG_ERROR("nativeAddSink - sink filter_ptr is null, conversion failed");
+      FB_LOG_ERROR(
+          "nativeAddSink - sink filter_ptr is null, conversion failed");
       return 0;
     }
 
     if (!*filter_ptr) {
-      LOG_ERROR(
+      FB_LOG_ERROR(
           "nativeAddSink - *sink filter_ptr is null, invalid Filter object");
       return 0;
     }
@@ -89,12 +92,12 @@ Java_com_pixpark_gpupixel_GPUPixelSource_nativeAddSink(
     // If it's a regular Sink type
     auto* sink_ptr = reinterpret_cast<std::shared_ptr<Sink>*>(sink_id);
     if (!sink_ptr) {
-      LOG_ERROR("nativeAddSink - sink_ptr is null, conversion failed");
+      FB_LOG_ERROR("nativeAddSink - sink_ptr is null, conversion failed");
       return 0;
     }
 
     if (!*sink_ptr) {
-      LOG_ERROR("nativeAddSink - *sink_ptr is null, invalid Sink object");
+      FB_LOG_ERROR("nativeAddSink - *sink_ptr is null, invalid Sink object");
       return 0;
     }
 
@@ -124,7 +127,7 @@ Java_com_pixpark_gpupixel_GPUPixelSource_nativeRemoveSink(
     // If source is a Filter type
     auto* filter_ptr = reinterpret_cast<std::shared_ptr<Filter>*>(source_id);
     if (!filter_ptr || !*filter_ptr) {
-      LOG_ERROR("nativeRemoveSink - Invalid Source Filter object");
+      FB_LOG_ERROR("nativeRemoveSink - Invalid Source Filter object");
       return;
     }
     source = std::static_pointer_cast<Source>(*filter_ptr);
@@ -132,7 +135,7 @@ Java_com_pixpark_gpupixel_GPUPixelSource_nativeRemoveSink(
     // If it's a regular Source type
     auto* source_ptr = reinterpret_cast<std::shared_ptr<Source>*>(source_id);
     if (!source_ptr || !*source_ptr) {
-      LOG_ERROR("nativeRemoveSink - Invalid Source object");
+      FB_LOG_ERROR("nativeRemoveSink - Invalid Source object");
       return;
     }
     source = *source_ptr;
@@ -145,7 +148,7 @@ Java_com_pixpark_gpupixel_GPUPixelSource_nativeRemoveSink(
     // If it's a Filter type
     auto* filter_ptr = reinterpret_cast<std::shared_ptr<Filter>*>(sink_id);
     if (!filter_ptr || !*filter_ptr) {
-      LOG_ERROR("nativeRemoveSink - Invalid Filter object");
+      FB_LOG_ERROR("nativeRemoveSink - Invalid Filter object");
       return;
     }
 
@@ -154,7 +157,7 @@ Java_com_pixpark_gpupixel_GPUPixelSource_nativeRemoveSink(
     // If it's a regular Sink type
     auto* sink_ptr = reinterpret_cast<std::shared_ptr<Sink>*>(sink_id);
     if (!sink_ptr || !*sink_ptr) {
-      LOG_ERROR("nativeRemoveSink - Invalid Sink object");
+      FB_LOG_ERROR("nativeRemoveSink - Invalid Sink object");
       return;
     }
 
