@@ -48,6 +48,7 @@ set(common_source_files
     ${CMAKE_CURRENT_SOURCE_DIR}/filter/exposure_filter.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/filter/rgb_filter.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/filter/tiezihi_filter.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/filter/portrait_seg_filter.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/filter/face_makeup_filter.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/filter/hue_filter.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/filter/nearby_sampling3x3_filter.cc

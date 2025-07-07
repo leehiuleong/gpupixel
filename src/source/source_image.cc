@@ -66,15 +66,15 @@ std::shared_ptr<SourceImage> SourceImage::Create(const std::string path) {
     assert(false && "SourceImage: image path not found");
     return nullptr;
   }
-  int width, height, channel_count;
-  unsigned char* data =
-      stbi_load(path.c_str(), &width, &height, &channel_count, 4);
+  int width, height, channel;
+  unsigned char* data = stbi_load(path.c_str(), &width, &height, &channel, 4);
   FB_LOG_INFO("create source image path: {}", path);
   if (data == nullptr) {
     FB_LOG_ERROR("stbi_load create image failed! file path: {}", path);
     assert(data != nullptr && "stbi_load create image failed");
     return nullptr;
   }
+  int channel_count = 4;
   auto image =
       SourceImage::CreateFromPixelData(width, height, channel_count, data);
   stbi_image_free(data);
@@ -95,9 +95,20 @@ void SourceImage::Init(int width,
   this->SetFramebuffer(framebuffer_);
   GL_CALL(glBindTexture(GL_TEXTURE_2D, this->GetFramebuffer()->GetTexture()));
 
-  GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
-                       GL_UNSIGNED_BYTE, pixels));
-  image_bytes_.assign(pixels, pixels + width * height * 4);
+  if (channel_count == 4) {
+    GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
+                         GL_UNSIGNED_BYTE, pixels));
+    image_bytes_.assign(pixels, pixels + width * height * 4);
+  } else if (channel_count == 3) {
+    GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGB,
+                         GL_UNSIGNED_BYTE, pixels));
+    image_bytes_.assign(pixels, pixels + width * height * 3);
+  } else {
+    // gray image, only one channel
+    GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED,
+                         GL_UNSIGNED_BYTE, pixels));
+    image_bytes_.assign(pixels, pixels + width * height);
+  }
 
   GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
 }

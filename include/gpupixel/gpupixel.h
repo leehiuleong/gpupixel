@@ -63,6 +63,7 @@
 #include "gpupixel/filter/nearby_sampling3x3_filter.h"
 #include "gpupixel/filter/non_maximum_suppression_filter.h"
 #include "gpupixel/filter/pixellation_filter.h"
+#include "gpupixel/filter/portrait_seg_filter.h"
 #include "gpupixel/filter/posterize_filter.h"
 #include "gpupixel/filter/rgb_filter.h"
 #include "gpupixel/filter/saturation_filter.h"
