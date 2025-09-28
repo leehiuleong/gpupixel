@@ -42,16 +42,17 @@
 
 // face filters
 #include "beauty_face_filter.h"
-#include "face_makeup_filter.h"
-#include "lipstick_filter.h"
 #include "blusher_filter.h"
+#include "face_makeup_filter.h"
 #include "face_reshape_filter.h"
+#include "lipstick_filter.h"
 
 #include "box_blur_filter.h"
 #include "box_high_pass_filter.h"
 
 // general filters
 #include "bilateral_filter.h"
+#include "blend_filter.h"
 #include "brightness_filter.h"
 #include "canny_edge_detection_filter.h"
 #include "color_invert_filter.h"
@@ -63,14 +64,16 @@
 #include "directional_sobel_edge_detection_filter.h"
 #include "emboss_filter.h"
 #include "exposure_filter.h"
+#include "fisheye_filter.h"
 #include "gaussian_blur_filter.h"
 #include "gaussian_blur_mono_filter.h"
 #include "glass_sphere_filter.h"
 #include "grayscale_filter.h"
-#include "hsb_filter.h"
 #include "halftone_filter.h"
+#include "hsb_filter.h"
 #include "hue_filter.h"
 #include "ios_blur_filter.h"
+#include "lookup_filter.h"
 #include "luminance_range_filter.h"
 #include "nearby_sampling3x3_filter.h"
 #include "non_maximum_suppression_filter.h"

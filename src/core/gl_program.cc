@@ -114,6 +114,26 @@ bool GLProgram::_initWithShaderString(const std::string& vertexShaderSource,
 
   CHECK_GL(glLinkProgram(_program));
 
+  // 检查链接状态
+  GLint linkSuccess;
+  glGetProgramiv(_program, GL_LINK_STATUS, &linkSuccess);
+  if (linkSuccess == GL_FALSE) {
+    GLchar messages[256];
+    glGetProgramInfoLog(_program, sizeof(messages), 0, &messages[0]);
+#if defined(GPUPIXEL_IOS) || defined(GPUPIXEL_MAC)
+    NSString* messageString = [NSString stringWithUTF8String:messages];
+    NSLog(@"%@", messageString);
+#else
+
+#endif
+    gpupixel::Util::Log(
+        "ERROR", "GL ERROR GLProgram::_initWithShaderString program link failed %s",
+        messages);
+    CHECK_GL(glDeleteShader(vertShader));
+    CHECK_GL(glDeleteShader(fragShader));
+    return -1;
+  }
+
   CHECK_GL(glDeleteShader(vertShader));
   CHECK_GL(glDeleteShader(fragShader));
 
@@ -121,6 +141,10 @@ bool GLProgram::_initWithShaderString(const std::string& vertexShaderSource,
 }
 
 void GLProgram::use() {
+  if (_program == 0) {
+    gpupixel::Util::Log("ERROR", "GLProgram::use() called with invalid program (0)");
+    return;
+  }
   CHECK_GL(glUseProgram(_program));
 }
 
@@ -166,34 +190,46 @@ void GLProgram::setUniformValue(const std::string& uniformName,
 
 void GLProgram::setUniformValue(int uniformLocation, int value) {
   GPUPixelContext::getInstance()->setActiveShaderProgram(this);
-  CHECK_GL(glUniform1i(uniformLocation, value));
+  if (uniformLocation >= 0) {
+    CHECK_GL(glUniform1i(uniformLocation, value));
+  }
 }
 
 void GLProgram::setUniformValue(int uniformLocation, float value) {
   GPUPixelContext::getInstance()->setActiveShaderProgram(this);
-  CHECK_GL(glUniform1f(uniformLocation, value));
+  if (uniformLocation >= 0) {
+    CHECK_GL(glUniform1f(uniformLocation, value));
+  }
 }
 
 void GLProgram::setUniformValue(int uniformLocation, Matrix4 value) {
   GPUPixelContext::getInstance()->setActiveShaderProgram(this);
-  CHECK_GL(glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, (GLfloat*)&value));
+  if (uniformLocation >= 0) {
+    CHECK_GL(glUniformMatrix4fv(uniformLocation, 1, GL_FALSE, (GLfloat*)&value));
+  }
 }
 
 void GLProgram::setUniformValue(int uniformLocation, Vector2 value) {
   GPUPixelContext::getInstance()->setActiveShaderProgram(this);
-  CHECK_GL(glUniform2f(uniformLocation, value.x, value.y));
+  if (uniformLocation >= 0) {
+    CHECK_GL(glUniform2f(uniformLocation, value.x, value.y));
+  }
 }
 
 void GLProgram::setUniformValue(int uniformLocation, Matrix3 value) {
   GPUPixelContext::getInstance()->setActiveShaderProgram(this);
-  CHECK_GL(glUniformMatrix3fv(uniformLocation, 1, GL_FALSE, (GLfloat*)&value));
+  if (uniformLocation >= 0) {
+    CHECK_GL(glUniformMatrix3fv(uniformLocation, 1, GL_FALSE, (GLfloat*)&value));
+  }
 }
 
 void GLProgram::setUniformValue(int uniformLocation,
                                 const void* value,
                                 int length) {
   GPUPixelContext::getInstance()->setActiveShaderProgram(this);
-  CHECK_GL(glUniform1fv(uniformLocation, length, (GLfloat*)value));
+  if (uniformLocation >= 0) {
+    CHECK_GL(glUniform1fv(uniformLocation, length, (GLfloat*)value));
+  }
 }
 
 NS_GPUPIXEL_END

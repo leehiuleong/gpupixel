@@ -8,6 +8,9 @@
 #include "filter.h"
 #include "gpupixel.h"
 #include "gpupixel_context.h"
+#include "lookup_filter.h"
+#include "fisheye_filter.h"
+#include "blend_filter.h"
 
 NS_GPUPIXEL_BEGIN
 
@@ -17,6 +20,13 @@ std::map<std::string, std::function<std::shared_ptr<Filter>()>> initFilterFactor
     factory["FaceReshapeFilter"] = FaceReshapeFilter::create;
     factory["LipstickFilter"] = LipstickFilter::create;
     factory["BlusherFilter"] = BlusherFilter::create;
+    factory["FisheyeFilter"] = FisheyeFilter::create;
+    factory["LookupFilter"] = []() -> std::shared_ptr<Filter> {
+        return std::static_pointer_cast<Filter>(LookupFilter::create(""));
+    };
+    factory["BlendFilter"] = []() -> std::shared_ptr<Filter> {
+        return std::static_pointer_cast<Filter>(BlendFilter::create());
+    };
     return  factory;
 }
 std::map<std::string, std::function<std::shared_ptr<Filter>()>> Filter::_filterFactories = initFilterFactory();
@@ -143,13 +153,24 @@ bool Filter::proceed(bool bUpdateTargets /* = true*/,
     GLuint filterTexCoordAttribute = _filterProgram->getAttribLocation(
         texIdx == 0 ? "inputTextureCoordinate"
                     : Util::str_format("inputTextureCoordinate%d", texIdx));
-    CHECK_GL(glEnableVertexAttribArray(filterTexCoordAttribute));
-    CHECK_GL(
-        glVertexAttribPointer(filterTexCoordAttribute, 2, GL_FLOAT, 0, 0,
-                              _getTexureCoordinate(it->second.rotationMode)));
+    if (filterTexCoordAttribute != (GLuint)-1) {
+      CHECK_GL(glEnableVertexAttribArray(filterTexCoordAttribute));
+      CHECK_GL(
+          glVertexAttribPointer(filterTexCoordAttribute, 2, GL_FLOAT, 0, 0,
+                                _getTexureCoordinate(it->second.rotationMode)));
+    }
   }
-  CHECK_GL(glVertexAttribPointer(_filterPositionAttribute, 2, GL_FLOAT, 0, 0,
-                                 imageVertices));
+  // Ensure position attribute is valid
+  if (_filterPositionAttribute == (GLuint)-1) {
+    _filterPositionAttribute = _filterProgram->getAttribLocation("position");
+    if (_filterPositionAttribute != (GLuint)-1) {
+      CHECK_GL(glEnableVertexAttribArray(_filterPositionAttribute));
+    }
+  }
+  if (_filterPositionAttribute != (GLuint)-1) {
+    CHECK_GL(glVertexAttribPointer(_filterPositionAttribute, 2, GL_FLOAT, 0, 0,
+                                   imageVertices));
+  }
   CHECK_GL(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
 
   _framebuffer->inactive();

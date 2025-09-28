@@ -112,7 +112,7 @@ using namespace gpupixel;
 -(void)initVideoFilter {
     gpupixel::GPUPixelContext::getInstance()->runSync([&] {
         gpuPixelRawInput = SourceRawDataInput::create();
-        gpuPixelView = [[GPUPixelView alloc] initWithFrame:self.view.frame];
+        gpuPixelView = [[GPUPixelView alloc] initWithFrame:CGRectMake(0, 0 ,self.view.frame.size.width, self.view.frame.size.width * 4.0 / 3.0)];
         [self.view addSubview:gpuPixelView];
         
         
@@ -154,13 +154,13 @@ using namespace gpupixel;
                 uint32_t bitmapInfo = kCGImageAlphaPremultipliedFirst | kCGBitmapByteOrder32Little;
                 CGContextRef context = CGBitmapContextCreate(imageData, width, height, bitsPerComponent, bytesPerRow, space, bitmapInfo);
                 CGImageRef cgImage = CGBitmapContextCreateImage(context);
-                UIImage *resultImage = [UIImage imageWithCGImage:cgImage];
+                CIImage *ciImage = [CIImage imageWithCGImage:cgImage];
+                UIImage *resultImage = [UIImage imageWithCIImage:ciImage];
                 NSLog(@"打印UIImage图像对象 : %@", resultImage);
                 
                 //Release memory
                 CGContextRelease(context);
                 CGImageRelease(cgImage);
-                CGColorSpaceRelease(space);
                 weakSelf.isNeedSaveImage = NO;
             }
         };
@@ -358,7 +358,7 @@ using namespace gpupixel;
     VCVideoCapturerParam *param = [[VCVideoCapturerParam alloc] init];
     param.frameRate = 30;
     
-    param.sessionPreset = AVCaptureSessionPresetHigh;
+    param.sessionPreset = AVCaptureSessionPresetPhoto;
     if(captureYuvFrame) {
       param.pixelsFormatType = kCVPixelFormatType_420YpCbCr8BiPlanarFullRange;
     } else {
