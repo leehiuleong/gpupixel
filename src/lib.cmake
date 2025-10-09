@@ -227,6 +227,8 @@ ELSEIF(${CURRENT_OS} STREQUAL "macos")
 ELSEIF(${CURRENT_OS} STREQUAL "ios")
 	TARGET_LINK_LIBRARIES(
 	${PROJECT_NAME} "-framework OpenGLES 		\
+					-framework Foundation \
+					-framework CoreFoundation \
 					-framework UIKit 		\
 					-framework QuartzCore  	\
 					-framework CoreVideo  	\

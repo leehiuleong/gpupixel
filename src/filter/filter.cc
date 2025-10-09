@@ -11,6 +11,9 @@
 #include "lookup_filter.h"
 #include "fisheye_filter.h"
 #include "blend_filter.h"
+#include "face_decorative_filter.h"
+#include "face_hat_filter.h"
+#include "face_glasses_filter.h"
 
 NS_GPUPIXEL_BEGIN
 
@@ -27,6 +30,18 @@ std::map<std::string, std::function<std::shared_ptr<Filter>()>> initFilterFactor
     factory["BlendFilter"] = []() -> std::shared_ptr<Filter> {
         return std::static_pointer_cast<Filter>(BlendFilter::create());
     };
+    
+    // Face decorative filters
+    factory["FaceDecorativeFilter"] = []() -> std::shared_ptr<Filter> {
+        return std::static_pointer_cast<Filter>(FaceDecorativeFilter::create());
+    };
+    factory["FaceHatFilter"] = []() -> std::shared_ptr<Filter> {
+        return std::static_pointer_cast<Filter>(FaceHatFilter::create());
+    };
+    factory["FaceGlassesFilter"] = []() -> std::shared_ptr<Filter> {
+        return std::static_pointer_cast<Filter>(FaceGlassesFilter::create());
+    };
+    
     return  factory;
 }
 std::map<std::string, std::function<std::shared_ptr<Filter>()>> Filter::_filterFactories = initFilterFactory();

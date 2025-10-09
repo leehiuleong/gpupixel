@@ -47,6 +47,11 @@
 #include "face_reshape_filter.h"
 #include "lipstick_filter.h"
 
+// face decorative filters
+#include "face_decorative_filter.h"
+#include "face_hat_filter.h"
+#include "face_glasses_filter.h"
+
 #include "box_blur_filter.h"
 #include "box_high_pass_filter.h"
 

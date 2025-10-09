@@ -228,6 +228,37 @@ void GLProgram::setUniformValue(int uniformLocation,
                                 int length) {
   GPUPixelContext::getInstance()->setActiveShaderProgram(this);
   if (uniformLocation >= 0) {
+    // 检查OpenGL状态
+    GLenum error = glGetError();
+    if (error != GL_NO_ERROR) {
+      gpupixel::Util::Log("ERROR", "OpenGL error before glUniform1fv: 0x%x", error);
+      return;
+    }
+    
+    // 检查当前程序是否有效
+    GLint currentProgram;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
+    if (currentProgram != _program) {
+      gpupixel::Util::Log("ERROR", "Shader program not bound correctly. Expected: %d, Current: %d", _program, currentProgram);
+      return;
+    }
+    
+    // 检查uniform location是否有效
+    GLenum uniformType;
+    glGetActiveUniform(_program, uniformLocation, 0, nullptr, nullptr, &uniformType, nullptr);
+    GLenum uniformError = glGetError();
+    if (uniformError != GL_NO_ERROR) {
+      gpupixel::Util::Log("ERROR", "Invalid uniform location: %d, error: 0x%x", uniformLocation, uniformError);
+      return;
+    }
+    
+    // 检查uniform类型是否匹配
+    if (uniformType != GL_FLOAT && uniformType != GL_FLOAT_VEC2 && uniformType != GL_FLOAT_VEC3 && uniformType != GL_FLOAT_VEC4) {
+      gpupixel::Util::Log("ERROR", "Uniform type mismatch: location=%d, type=0x%x, expected float type", uniformLocation, uniformType);
+      return;
+    }
+    
+    gpupixel::Util::Log("DEBUG", "Calling glUniform1fv: location=%d, length=%d, program=%d", uniformLocation, length, _program);
     CHECK_GL(glUniform1fv(uniformLocation, length, (GLfloat*)value));
   }
 }

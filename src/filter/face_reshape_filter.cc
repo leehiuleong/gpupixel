@@ -262,8 +262,16 @@ bool FaceReshapeFilter::proceed(bool bUpdateTargets, int64_t frameTime) {
 
   _filterProgram->setUniformValue("hasFace", has_face_);
   if (has_face_) {
-    _filterProgram->setUniformValue("facePoints", face_land_marks_.data(),
-                                    static_cast<int>(face_land_marks_.size()));
+    // Shader期望106个点(212个float值)，但实际可能有更多点
+    // 只传递前106个点以避免GL_INVALID_OPERATION错误
+    int expectedPoints = 106;
+    int actualPoints = static_cast<int>(face_land_marks_.size()) / 2;
+    int pointsToUse = std::min(expectedPoints, actualPoints);
+    
+    if (pointsToUse > 0) {
+      _filterProgram->setUniformValue("facePoints", face_land_marks_.data(),
+                                      pointsToUse * 2);
+    }
   }
   return Filter::proceed(bUpdateTargets, frameTime);
 }
