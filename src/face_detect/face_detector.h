@@ -44,7 +44,7 @@ NS_GPUPIXEL_BEGIN
         int RegFacesDetectorCallback(FacesDetectorCallback facesDetectorCallback);
     private:
         uint32_t vnn_handle_;
-        int use_278pts = 0;
+        int use_278pts = 0;  // 使用104点模式
         std::vector<FaceDetectorCallback> _face_detector_callbacks;
         std::vector<FacesDetectorCallback> _faces_detector_callbacks;
     };

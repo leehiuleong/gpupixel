@@ -21,9 +21,9 @@ class SourceImage;
 typedef enum {
     FACE_DECORATIVE_TYPE_HEAD,      // 头部装饰（如帽子、头饰）
     FACE_DECORATIVE_TYPE_EYES,      // 眼部装饰（如眼镜、眼罩）
-    FACE_DECORATIVE_TYPE_CHEEKS,    // 脸颊装饰（如腮红、贴纸）
     FACE_DECORATIVE_TYPE_MOUTH,     // 嘴部装饰（如口罩、胡须）
-    FACE_DECORATIVE_TYPE_EARS,      // 耳朵装饰（如耳环、耳机）
+    FACE_DECORATIVE_TYPE_NOSE,      // 鼻子装饰
+    FACE_DECORATIVE_TYPE_FOREHEAD,  // 额头装饰（如额头贴纸）
     FACE_DECORATIVE_TYPE_CUSTOM     // 自定义装饰
 } FaceDecorativeType;
 

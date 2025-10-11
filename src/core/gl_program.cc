@@ -258,7 +258,7 @@ void GLProgram::setUniformValue(int uniformLocation,
       return;
     }
     
-    gpupixel::Util::Log("DEBUG", "Calling glUniform1fv: location=%d, length=%d, program=%d", uniformLocation, length, _program);
+    // gpupixel::Util::Log("DEBUG", "Calling glUniform1fv: location=%d, length=%d, program=%d", uniformLocation, length, _program);
     CHECK_GL(glUniform1fv(uniformLocation, length, (GLfloat*)value));
   }
 }

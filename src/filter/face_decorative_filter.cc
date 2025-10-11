@@ -31,48 +31,42 @@ const std::string FaceDecorativeVertexShaderString = R"(
 const std::string FaceDecorativeFragmentShaderString = R"(
     precision mediump float;
     varying highp vec2 textureCoordinate;
-    uniform sampler2D inputImageTexture;
     uniform sampler2D decorativeTexture;
     uniform float alpha;
     uniform float intensity;
     
     void main() {
-        vec4 originalColor = texture2D(inputImageTexture, textureCoordinate);
         vec4 decorativeColor = texture2D(decorativeTexture, textureCoordinate);
         
+        // 如果装饰图像是透明的，则不渲染
         if (decorativeColor.a == 0.0) {
-            gl_FragColor = originalColor;
+            discard;
             return;
         }
         
-        // 混合原始图像和装饰图像
-        float blendAlpha = decorativeColor.a * alpha * intensity;
-        vec3 blendedColor = mix(originalColor.rgb, decorativeColor.rgb, blendAlpha);
-        
-        gl_FragColor = vec4(blendedColor, originalColor.a);
+        // 只渲染装饰图像，不混合原始图像
+        float finalAlpha = decorativeColor.a * alpha * intensity;
+        gl_FragColor = vec4(decorativeColor.rgb, finalAlpha);
     })";
 #elif defined(GPUPIXEL_MAC) || defined(GPUPIXEL_WIN) || defined(GPUPIXEL_LINUX)
 const std::string FaceDecorativeFragmentShaderString = R"(
     varying vec2 textureCoordinate;
-    uniform sampler2D inputImageTexture;
     uniform sampler2D decorativeTexture;
     uniform float alpha;
     uniform float intensity;
     
     void main() {
-        vec4 originalColor = texture2D(inputImageTexture, textureCoordinate);
         vec4 decorativeColor = texture2D(decorativeTexture, textureCoordinate);
         
+        // 如果装饰图像是透明的，则不渲染
         if (decorativeColor.a == 0.0) {
-            gl_FragColor = originalColor;
+            discard;
             return;
         }
         
-        // 混合原始图像和装饰图像
-        float blendAlpha = decorativeColor.a * alpha * intensity;
-        vec3 blendedColor = mix(originalColor.rgb, decorativeColor.rgb, blendAlpha);
-        
-        gl_FragColor = vec4(blendedColor, originalColor.a);
+        // 只渲染装饰图像，不混合原始图像
+        float finalAlpha = decorativeColor.a * alpha * intensity;
+        gl_FragColor = vec4(decorativeColor.rgb, finalAlpha);
     })";
 #endif
 
@@ -170,21 +164,26 @@ void FaceDecorativeFilter::initFaceDetector() {
 }
 
 void FaceDecorativeFilter::initKeyPointIndices() {
-    // 头部装饰关键点（额头区域）
+    // 头部装饰关键点（额头区域）- 使用头部轮廓关键点
+    // 根据VNN 278点模型，头部轮廓通常是前33个点
     keypoint_indices_[FACE_DECORATIVE_TYPE_HEAD] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32};
     
-    // 眼部装饰关键点（眼睛区域）
+    // 眼部装饰关键点（眼睛区域）- 使用眼部关键点
+    // 眼部关键点通常在33-79范围内
     keypoint_indices_[FACE_DECORATIVE_TYPE_EYES] = {33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79};
-    
-    // 脸颊装饰关键点（脸颊区域）
-    keypoint_indices_[FACE_DECORATIVE_TYPE_CHEEKS] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32};
-    
-    // 嘴部装饰关键点（嘴部区域）
+        
+    // 嘴部装饰关键点（嘴部区域）- 使用嘴部关键点
+    // 嘴部关键点通常在84-110范围内
     keypoint_indices_[FACE_DECORATIVE_TYPE_MOUTH] = {84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110};
+
+    // 额头装饰关键点（额头区域）- 使用额头关键点
+    // 额头关键点通常在139-142范围内
+    keypoint_indices_[FACE_DECORATIVE_TYPE_FOREHEAD] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32};
     
-    // 耳朵装饰关键点（耳朵区域）
-    keypoint_indices_[FACE_DECORATIVE_TYPE_EARS] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32};
-    
+    // 鼻子装饰关键点（鼻子区域）- 使用鼻子关键点
+    // 鼻子关键点通常在143-148范围内
+    keypoint_indices_[FACE_DECORATIVE_TYPE_NOSE] = {52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64};
+
     // 自定义装饰使用所有关键点
     keypoint_indices_[FACE_DECORATIVE_TYPE_CUSTOM] = {};
     for (int i = 0; i < 110; i++) {
@@ -374,18 +373,16 @@ bool FaceDecorativeFilter::proceed(bool bUpdateTargets, int64_t frameTime) {
     decorative_texcoords_ = calculateDecorativeTexCoords();
     
     // 设置变换矩阵
-    decorative_program_->setUniformValue("transformMatrix", transform_matrix_, 16);
+    Matrix4 matrix;
+    memcpy(&matrix, transform_matrix_, sizeof(float) * 16);
+    decorative_program_->setUniformValue("transformMatrix", matrix);
     decorative_program_->setUniformValue("alpha", current_config_.alpha);
     decorative_program_->setUniformValue("intensity", intensity_);
     
-    // 绑定纹理
-    CHECK_GL(glActiveTexture(GL_TEXTURE1));
-    CHECK_GL(glBindTexture(GL_TEXTURE_2D, _inputFramebuffers[0].frameBuffer->getTexture()));
-    decorative_program_->setUniformValue("inputImageTexture", 1);
-    
-    CHECK_GL(glActiveTexture(GL_TEXTURE2));
+    // 绑定装饰纹理
+    CHECK_GL(glActiveTexture(GL_TEXTURE0));
     CHECK_GL(glBindTexture(GL_TEXTURE_2D, decorative_image_->getFramebuffer()->getTexture()));
-    decorative_program_->setUniformValue("decorativeTexture", 2);
+    decorative_program_->setUniformValue("decorativeTexture", 0);
     
     // 设置顶点属性
     CHECK_GL(glEnableVertexAttribArray(position_attribute_));
