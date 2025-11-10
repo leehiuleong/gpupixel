@@ -36,6 +36,10 @@
 #include "gpupixel/filter/blusher_filter.h"
 #include "gpupixel/filter/face_makeup_filter.h"
 #include "gpupixel/filter/face_reshape_filter.h"
+#include "gpupixel/filter/image_overlay_filter.h"
+#include "gpupixel/filter/mask_overlay_filter.h"
+#include "gpupixel/filter/nose_dero_filter.h"
+#include "gpupixel/filter/eye_dero_filter.h"
 #include "gpupixel/filter/lipstick_filter.h"
 
 // general filters

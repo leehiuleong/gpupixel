@@ -19,6 +19,10 @@ init_filter_factory() {
   // Beauty filters
   factory["BeautyFaceFilter"] = BeautyFaceFilter::Create;
   factory["FaceReshapeFilter"] = FaceReshapeFilter::Create;
+  factory["ImageOverlayFilter"] = ImageOverlayFilter::Create;
+  factory["MaskOverlayFilter"] = MaskOverlayFilter::Create;
+  factory["NoseDeroFilter"] = NoseDeroFilter::Create;
+  factory["EyeDeroFilter"] = EyeDeroFilter::Create;
   factory["LipstickFilter"] = LipstickFilter::Create;
   factory["BlusherFilter"] = BlusherFilter::Create;
   factory["FaceMakeupFilter"] = FaceMakeupFilter::Create;

@@ -50,6 +50,10 @@ set(common_source_files
     ${CMAKE_CURRENT_SOURCE_DIR}/filter/rgb_filter.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/filter/face_makeup_filter.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/filter/hue_filter.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/filter/image_overlay_filter.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/filter/mask_overlay_filter.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/filter/nose_dero_filter.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/filter/eye_dero_filter.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/filter/nearby_sampling3x3_filter.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/filter/posterize_filter.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/filter/color_invert_filter.cc
@@ -162,6 +166,10 @@ set(public_filter_header_files
     ${PROJECT_SOURCE_DIR}/include/gpupixel/filter/nearby_sampling3x3_filter.h
     ${PROJECT_SOURCE_DIR}/include/gpupixel/filter/gaussian_blur_mono_filter.h
     ${PROJECT_SOURCE_DIR}/include/gpupixel/filter/face_makeup_filter.h
+    ${PROJECT_SOURCE_DIR}/include/gpupixel/filter/image_overlay_filter.h
+    ${PROJECT_SOURCE_DIR}/include/gpupixel/filter/mask_overlay_filter.h
+    ${PROJECT_SOURCE_DIR}/include/gpupixel/filter/nose_dero_filter.h
+    ${PROJECT_SOURCE_DIR}/include/gpupixel/filter/eye_dero_filter.h
     ${PROJECT_SOURCE_DIR}/include/gpupixel/filter/emboss_filter.h
     ${PROJECT_SOURCE_DIR}/include/gpupixel/filter/canny_edge_detection_filter.h
     ${PROJECT_SOURCE_DIR}/include/gpupixel/filter/box_difference_filter.h
