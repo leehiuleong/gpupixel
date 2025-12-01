@@ -12,10 +12,16 @@
 namespace gpupixel {
 class SourceImage;
 
-class GPUPIXEL_API EyeDeroFilter : public Filter {
+enum class HeadAccessoryLocation {
+  LEFT,    // 左眉毛最左侧
+  MIDDLE,  // 眉心
+  RIGHT    // 右眉毛最右侧
+};
+
+class GPUPIXEL_API HeadAccessoryFilter : public Filter {
  public:
-  static std::shared_ptr<EyeDeroFilter> Create();
-  ~EyeDeroFilter();
+  static std::shared_ptr<HeadAccessoryFilter> Create();
+  ~HeadAccessoryFilter();
   virtual bool Init();
   virtual bool DoRender(bool updateSinks = true) override;
 
@@ -31,14 +37,14 @@ class GPUPIXEL_API EyeDeroFilter : public Filter {
   // 设置混合强度 [0.0, 1.0]
   void SetBlendLevel(float level) { blend_level_ = level; }
 
-  // 设置图片大小（归一化坐标，相对于人脸大小）
-  void SetImageSize(float width, float height) {
-    image_width_ = width;
-    image_height_ = height;
-  }
+  // 设置头顶偏移量（相对于头部宽度，默认0.15）
+  void SetHeadOffset(float offset) { head_offset_ = offset; }
+
+  // 设置头饰位置（left/middle/right，默认middle）
+  void SetLocation(HeadAccessoryLocation location) { location_ = location; }
 
  protected:
-  EyeDeroFilter();
+  HeadAccessoryFilter();
 
  private:
   // 人脸关键点（OpenGL 坐标 -1 到 1）
@@ -51,8 +57,8 @@ class GPUPIXEL_API EyeDeroFilter : public Filter {
   // 渲染参数
   float opacity_ = 1.0f;
   float blend_level_ = 1.0f;
-  float image_width_ = 0.4f;   // 默认宽度
-  float image_height_ = 0.2f;  // 默认高度
+  float head_offset_ = 0.15f;  // 头顶偏移量（相对于头部宽度）
+  HeadAccessoryLocation location_ = HeadAccessoryLocation::MIDDLE;  // 头饰位置
 
   // OpenGL 程序
   GPUPixelGLProgram* filter_program2_ = nullptr;

@@ -27,6 +27,7 @@ set(common_source_files
     ${CMAKE_CURRENT_SOURCE_DIR}/filter/glass_sphere_filter.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/filter/brightness_filter.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/filter/ios_blur_filter.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/filter/lookup_filter.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/filter/hsb_filter.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/filter/sobel_edge_detection_filter.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/filter/sphere_refraction_filter.cc
@@ -54,6 +55,7 @@ set(common_source_files
     ${CMAKE_CURRENT_SOURCE_DIR}/filter/mask_overlay_filter.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/filter/nose_dero_filter.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/filter/eye_dero_filter.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/filter/head_accessory_filter.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/filter/nearby_sampling3x3_filter.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/filter/posterize_filter.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/filter/color_invert_filter.cc
@@ -170,6 +172,7 @@ set(public_filter_header_files
     ${PROJECT_SOURCE_DIR}/include/gpupixel/filter/mask_overlay_filter.h
     ${PROJECT_SOURCE_DIR}/include/gpupixel/filter/nose_dero_filter.h
     ${PROJECT_SOURCE_DIR}/include/gpupixel/filter/eye_dero_filter.h
+    ${PROJECT_SOURCE_DIR}/include/gpupixel/filter/head_accessory_filter.h
     ${PROJECT_SOURCE_DIR}/include/gpupixel/filter/emboss_filter.h
     ${PROJECT_SOURCE_DIR}/include/gpupixel/filter/canny_edge_detection_filter.h
     ${PROJECT_SOURCE_DIR}/include/gpupixel/filter/box_difference_filter.h
@@ -185,6 +188,7 @@ set(public_filter_header_files
     ${PROJECT_SOURCE_DIR}/include/gpupixel/filter/color_invert_filter.h
     ${PROJECT_SOURCE_DIR}/include/gpupixel/filter/filter_group.h
     ${PROJECT_SOURCE_DIR}/include/gpupixel/filter/ios_blur_filter.h
+    ${PROJECT_SOURCE_DIR}/include/gpupixel/filter/lookup_filter.h
     ${PROJECT_SOURCE_DIR}/include/gpupixel/filter/halftone_filter.h
     ${PROJECT_SOURCE_DIR}/include/gpupixel/filter/pixellation_filter.h)
 

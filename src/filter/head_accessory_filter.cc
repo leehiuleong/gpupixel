@@ -5,16 +5,17 @@
  * Copyright © 2021 PixPark. All rights reserved.
  */
 
-#include "gpupixel/filter/eye_dero_filter.h"
+#include "gpupixel/filter/head_accessory_filter.h"
 #include "core/gpupixel_context.h"
 #include "core/gpupixel_gl_include.h"
 #include "gpupixel/source/source_image.h"
 #include "utils/util.h"
+#include <cmath>
 
 namespace gpupixel {
 
 #if defined(GPUPIXEL_GLES_SHADER)
-const std::string kEyeDeroVertexShaderString = R"(
+const std::string kHeadAccessoryVertexShaderString = R"(
     attribute vec3 position;
     attribute vec2 inputTextureCoordinate;
     varying vec2 textureCoordinate;
@@ -26,7 +27,7 @@ const std::string kEyeDeroVertexShaderString = R"(
       screenCoordinate = position.xy * 0.5 + 0.5;
     })";
 
-const std::string kEyeDeroFragmentShaderString = R"(
+const std::string kHeadAccessoryFragmentShaderString = R"(
     precision mediump float;
     varying vec2 textureCoordinate;
     varying vec2 screenCoordinate;
@@ -52,7 +53,7 @@ const std::string kEyeDeroFragmentShaderString = R"(
       gl_FragColor = vec4(color, bgColor.a);
     })";
 #elif defined(GPUPIXEL_GL_SHADER)
-const std::string kEyeDeroVertexShaderString = R"(
+const std::string kHeadAccessoryVertexShaderString = R"(
     attribute vec3 position;
     attribute vec2 inputTextureCoordinate;
     varying vec2 textureCoordinate;
@@ -64,7 +65,7 @@ const std::string kEyeDeroVertexShaderString = R"(
       screenCoordinate = position.xy * 0.5 + 0.5;
     })";
 
-const std::string kEyeDeroFragmentShaderString = R"(
+const std::string kHeadAccessoryFragmentShaderString = R"(
     varying vec2 textureCoordinate;
     varying vec2 screenCoordinate;
     uniform sampler2D inputImageTexture;
@@ -90,17 +91,17 @@ const std::string kEyeDeroFragmentShaderString = R"(
     })";
 #endif
 
-EyeDeroFilter::EyeDeroFilter() {}
+HeadAccessoryFilter::HeadAccessoryFilter() {}
 
-EyeDeroFilter::~EyeDeroFilter() {
+HeadAccessoryFilter::~HeadAccessoryFilter() {
   if (filter_program2_) {
     delete filter_program2_;
     filter_program2_ = nullptr;
   }
 }
 
-std::shared_ptr<EyeDeroFilter> EyeDeroFilter::Create() {
-  auto ret = std::shared_ptr<EyeDeroFilter>(new EyeDeroFilter());
+std::shared_ptr<HeadAccessoryFilter> HeadAccessoryFilter::Create() {
+  auto ret = std::shared_ptr<HeadAccessoryFilter>(new HeadAccessoryFilter());
   gpupixel::GPUPixelContext::GetInstance()->SyncRunWithContext([&] {
     if (ret && !ret->Init()) {
       ret.reset();
@@ -109,9 +110,9 @@ std::shared_ptr<EyeDeroFilter> EyeDeroFilter::Create() {
   return ret;
 }
 
-bool EyeDeroFilter::Init() {
-  if (!Filter::InitWithShaderString(kEyeDeroVertexShaderString,
-                                    kEyeDeroFragmentShaderString)) {
+bool HeadAccessoryFilter::Init() {
+  if (!Filter::InitWithShaderString(kHeadAccessoryVertexShaderString,
+                                    kHeadAccessoryFragmentShaderString)) {
     return false;
   }
 
@@ -133,26 +134,33 @@ bool EyeDeroFilter::Init() {
 
   std::vector<float> default_landmarks;
   RegisterProperty("face_landmark", default_landmarks,
-                   "The face landmark for eye dero.",
+                   "The face landmark for head accessory.",
                    [this](std::vector<float> val) { SetFaceLandmarks(val); });
 
-  std::vector<float> default_image_size{0.4f, 0.2f};
-  RegisterProperty("image_size", default_image_size,
-                   "The size of overlay image [width, height] with range between 0 and 1.",
-                   [this](std::vector<float> val) {
-                     if (val.size() >= 2) {
-                       SetImageSize(val[0], val[1]);
+  RegisterProperty("head_offset", 0.15f,
+                   "The offset from eyebrow to head top (relative to head width).",
+                   [this](float& val) { SetHeadOffset(val); });
+
+  RegisterProperty("location", 1,  // 1 = MIDDLE (默认值)
+                   "The location of head accessory: 0=LEFT, 1=MIDDLE, 2=RIGHT.",
+                   [this](int& val) {
+                     if (val == 0) {
+                       SetLocation(HeadAccessoryLocation::LEFT);
+                     } else if (val == 1) {
+                       SetLocation(HeadAccessoryLocation::MIDDLE);
+                     } else if (val == 2) {
+                       SetLocation(HeadAccessoryLocation::RIGHT);
                      }
                    });
 
   return true;
 }
 
-void EyeDeroFilter::SetImageTexture(std::shared_ptr<SourceImage> texture) {
+void HeadAccessoryFilter::SetImageTexture(std::shared_ptr<SourceImage> texture) {
   image_texture_ = texture;
 }
 
-void EyeDeroFilter::SetFaceLandmarks(std::vector<float> landmarks) {
+void HeadAccessoryFilter::SetFaceLandmarks(std::vector<float> landmarks) {
   if (landmarks.size() == 0) {
     has_face_ = false;
     return;
@@ -166,7 +174,7 @@ void EyeDeroFilter::SetFaceLandmarks(std::vector<float> landmarks) {
   has_face_ = true;
 }
 
-bool EyeDeroFilter::DoRender(bool updateSinks) {
+bool HeadAccessoryFilter::DoRender(bool updateSinks) {
   if (!image_texture_ || !has_face_) {
     return Filter::DoRender(updateSinks);
   }
@@ -197,26 +205,66 @@ bool EyeDeroFilter::DoRender(bool updateSinks) {
 
   GL_CALL(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
 
-  // 第二步：渲染眼镜
+  // 第二步：渲染头饰
   GPUPixelContext::GetInstance()->SetActiveGlProgram(filter_program_);
 
-  // 点43是两眼之间的中心点（索引43*2和43*2+1）
-  if (face_landmarks_.size() < 88) {  // 至少需要44个点（点43需要索引43*2+1=87）
+  // 至少需要44个点（点43需要索引43*2+1=87，点16需要索引16*2+1=33）
+  if (face_landmarks_.size() < 88) {
     framebuffer_->Deactivate();
     return Source::DoRender(updateSinks);
   }
 
-  float eye_center_x = face_landmarks_[86];   // 点43的x (索引43*2)
-  float eye_center_y = face_landmarks_[87];  // 点43的y (索引43*2+1)
+  // 计算头部宽度：点0（左脸边缘）和点32（右脸边缘）的x坐标差
+  float left_face_x = face_landmarks_[0];    // 点0的x (索引0*2=0)
+  float right_face_x = face_landmarks_[64]; // 点32的x (索引32*2=64)
+  float head_width = std::abs(right_face_x - left_face_x);
 
-  // 以眼部中心为中心，构建矩形
-  float half_width = image_width_ * 0.5f;
-  float half_height = image_height_ * 0.5f;
+  // 获取关键点坐标
+  float left_eyebrow_x = face_landmarks_[66];   // 点33的x (索引33*2=66) - 左眉毛最左侧
+  float middle_brow_x = face_landmarks_[86];    // 点43的x (索引43*2=86) - 眉心
+  float middle_brow_y = face_landmarks_[87];    // 点43的y (索引43*2+1=87) - 眉心
+  float right_eyebrow_x = face_landmarks_[84];  // 点42的x (索引42*2=84) - 右眉毛最右侧
+  float chin_y = face_landmarks_[33];           // 点16的y (索引16*2+1=33) - 下巴中心
 
-  float x1 = eye_center_x - half_width;
-  float y1 = eye_center_y - half_height;
-  float x2 = eye_center_x + half_width;
-  float y2 = eye_center_y + half_height;
+  // 根据位置枚举选择x坐标
+  float head_accessory_x = 0.0f;
+  switch (location_) {
+    case HeadAccessoryLocation::LEFT:
+      head_accessory_x = left_eyebrow_x;
+      break;
+    case HeadAccessoryLocation::MIDDLE:
+      head_accessory_x = middle_brow_x;
+      break;
+    case HeadAccessoryLocation::RIGHT:
+      head_accessory_x = right_eyebrow_x;
+      break;
+  }
+
+  // 计算y坐标：距离眉心的y轴距离 = 眉心到下巴的距离的0.7倍
+  float brow_to_chin_distance = std::abs(middle_brow_y - chin_y);
+  float y_offset = brow_to_chin_distance * 0.7f;
+  float head_accessory_y = middle_brow_y - y_offset;  // 向上偏移
+
+  // 计算图片宽度：头部宽度的0.4倍
+  float image_width = head_width * 0.4f;
+
+  // 根据图片宽高比计算高度
+  int texture_width = image_texture_->GetWidth();
+  int texture_height = image_texture_->GetHeight();
+  float aspect_ratio = 1.0f;
+  if (texture_width > 0 && texture_height > 0) {
+    aspect_ratio = static_cast<float>(texture_width) / static_cast<float>(texture_height);
+  }
+  float image_height = image_width / aspect_ratio;
+
+  // 构建矩形顶点
+  float half_width = image_width * 0.5f;
+  float half_height = image_height * 0.5f;
+
+  float x1 = head_accessory_x - half_width;
+  float y1 = head_accessory_y - half_height;
+  float x2 = head_accessory_x + half_width;
+  float y2 = head_accessory_y + half_height;
 
   std::vector<float> overlayVertices = {x1, y1, x2, y1, x1, y2, x2, y2};
   std::vector<float> overlayTexCoords = {0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f};

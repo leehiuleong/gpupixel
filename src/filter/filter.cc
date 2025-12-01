@@ -23,9 +23,11 @@ init_filter_factory() {
   factory["MaskOverlayFilter"] = MaskOverlayFilter::Create;
   factory["NoseDeroFilter"] = NoseDeroFilter::Create;
   factory["EyeDeroFilter"] = EyeDeroFilter::Create;
+  factory["HeadAccessoryFilter"] = HeadAccessoryFilter::Create;
   factory["LipstickFilter"] = LipstickFilter::Create;
   factory["BlusherFilter"] = BlusherFilter::Create;
   factory["FaceMakeupFilter"] = FaceMakeupFilter::Create;
+  factory["LookupFilter"] = []() { return std::static_pointer_cast<Filter>(LookupFilter::Create()); };
 
   // // Basic adjustment filters
   // factory["ContrastFilter"] = ContrastFilter::Create;

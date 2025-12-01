@@ -40,6 +40,7 @@
 #include "gpupixel/filter/mask_overlay_filter.h"
 #include "gpupixel/filter/nose_dero_filter.h"
 #include "gpupixel/filter/eye_dero_filter.h"
+#include "gpupixel/filter/head_accessory_filter.h"
 #include "gpupixel/filter/lipstick_filter.h"
 
 // general filters
@@ -65,6 +66,7 @@
 #include "gpupixel/filter/hsb_filter.h"
 #include "gpupixel/filter/hue_filter.h"
 #include "gpupixel/filter/ios_blur_filter.h"
+#include "gpupixel/filter/lookup_filter.h"
 #include "gpupixel/filter/luminance_range_filter.h"
 #include "gpupixel/filter/nearby_sampling3x3_filter.h"
 #include "gpupixel/filter/non_maximum_suppression_filter.h"
