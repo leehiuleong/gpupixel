@@ -76,7 +76,8 @@ set(common_source_files
     ${CMAKE_CURRENT_SOURCE_DIR}/filter/beauty_face_filter.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/filter/face_reshape_filter.cc
     ${CMAKE_CURRENT_SOURCE_DIR}/filter/white_balance_filter.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/filter/smooth_toon_filter.cc)
+    ${CMAKE_CURRENT_SOURCE_DIR}/filter/smooth_toon_filter.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/filter/blend_filter.cc)
 
 # Add face detection source files based on options
 if(GPUPIXEL_ENABLE_FACE_DETECTOR)
@@ -190,7 +191,8 @@ set(public_filter_header_files
     ${PROJECT_SOURCE_DIR}/include/gpupixel/filter/ios_blur_filter.h
     ${PROJECT_SOURCE_DIR}/include/gpupixel/filter/lookup_filter.h
     ${PROJECT_SOURCE_DIR}/include/gpupixel/filter/halftone_filter.h
-    ${PROJECT_SOURCE_DIR}/include/gpupixel/filter/pixellation_filter.h)
+    ${PROJECT_SOURCE_DIR}/include/gpupixel/filter/pixellation_filter.h
+    ${PROJECT_SOURCE_DIR}/include/gpupixel/filter/blend_filter.h)
 
 set(internal_core_header_files
     ${CMAKE_CURRENT_SOURCE_DIR}/core/gpupixel_program.h

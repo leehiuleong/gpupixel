@@ -28,6 +28,7 @@ init_filter_factory() {
   factory["BlusherFilter"] = BlusherFilter::Create;
   factory["FaceMakeupFilter"] = FaceMakeupFilter::Create;
   factory["LookupFilter"] = []() { return std::static_pointer_cast<Filter>(LookupFilter::Create()); };
+  factory["BlendFilter"] = []() { return std::static_pointer_cast<Filter>(BlendFilter::Create()); };
 
   // // Basic adjustment filters
   // factory["ContrastFilter"] = ContrastFilter::Create;

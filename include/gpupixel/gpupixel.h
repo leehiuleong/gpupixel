@@ -45,6 +45,7 @@
 
 // general filters
 #include "gpupixel/filter/bilateral_filter.h"
+#include "gpupixel/filter/blend_filter.h"
 #include "gpupixel/filter/box_blur_filter.h"
 #include "gpupixel/filter/box_high_pass_filter.h"
 #include "gpupixel/filter/brightness_filter.h"
