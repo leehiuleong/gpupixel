@@ -102,6 +102,9 @@ void TargetView::update(int64_t frameTime) {
   CHECK_GL(glActiveTexture(GL_TEXTURE0));
   CHECK_GL(glBindTexture(GL_TEXTURE_2D,
                          _inputFramebuffers[0].frameBuffer->getTexture()));
+  // 使用高质量纹理过滤以获得最佳显示效果
+  CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+  CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
   CHECK_GL(glUniform1i(_colorMapUniformLocation, 0));
   CHECK_GL(glVertexAttribPointer(_positionAttribLocation, 2, GL_FLOAT, 0, 0,
                                  _displayVertices));

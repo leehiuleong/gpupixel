@@ -47,6 +47,7 @@ class Framebuffer {
   void inactive();
 
   static TextureAttributes defaultTextureAttribures;
+  static TextureAttributes displayTextureAttribures; // 用于显示优化，使用 GL_NEAREST 避免模糊
 
  private:
   int _width, _height;

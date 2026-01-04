@@ -66,9 +66,15 @@
 #if defined(GPUPIXEL_IOS)
     self.opaque = YES;
     self.hidden = NO;
+    self.contentScaleFactor = [UIScreen mainScreen].scale; // 使用屏幕原生分辨率
     CAEAGLLayer* eaglLayer = (CAEAGLLayer*)self.layer;
     eaglLayer.opaque = YES;
-    eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:NO], kEAGLDrawablePropertyRetainedBacking, kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat, nil];
+    eaglLayer.contentsScale = [UIScreen mainScreen].scale; // 确保使用 Retina 分辨率
+    // 优化 drawable properties 以提升显示质量
+    eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
+                                    [NSNumber numberWithBool:YES], kEAGLDrawablePropertyRetainedBacking, // 启用保留 backing
+                                    kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat,
+                                    nil];
     
 #else
     [self setOpenGLContext:gpupixel::GPUPixelContext::getInstance()->getOpenGLContext()];
@@ -244,6 +250,10 @@
 #endif
         CHECK_GL(glActiveTexture(GL_TEXTURE0));
         CHECK_GL(glBindTexture(GL_TEXTURE_2D, inputFramebuffer->getTexture()));
+        // 使用高质量纹理过滤以获得最佳显示效果
+        // GL_LINEAR 提供平滑的缩放，适合照片和视频内容
+        CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+        CHECK_GL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
         CHECK_GL(glUniform1i(colorMapUniformLocation, 0));
 
         CHECK_GL(glVertexAttribPointer(positionAttribLocation, 2, GL_FLOAT, 0, 0, displayVertices));

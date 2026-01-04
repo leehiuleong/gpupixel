@@ -23,10 +23,25 @@ TextureAttributes Framebuffer::defaultTextureAttribures = {
     .internalFormat = GL_RGBA,
     .format = GL_RGBA,
     .type = GL_UNSIGNED_BYTE};
+
+// 用于显示优化，使用 GL_NEAREST 避免模糊和摩尔纹
+TextureAttributes Framebuffer::displayTextureAttribures = {
+    .minFilter = GL_LINEAR,  // 缩小时仍用线性避免锯齿
+    .magFilter = GL_NEAREST, // 放大时用最近邻保持清晰
+    .wrapS = GL_CLAMP_TO_EDGE,
+    .wrapT = GL_CLAMP_TO_EDGE,
+    .internalFormat = GL_RGBA,
+    .format = GL_RGBA,
+    .type = GL_UNSIGNED_BYTE};
 #else
 TextureAttributes Framebuffer::defaultTextureAttribures = {
     GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE,
     GL_RGBA,   GL_RGBA,   GL_UNSIGNED_BYTE};
+
+// 用于显示优化，使用 GL_NEAREST 避免模糊和摩尔纹
+TextureAttributes Framebuffer::displayTextureAttribures = {
+    GL_LINEAR, GL_NEAREST, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE,
+    GL_RGBA,   GL_RGBA,    GL_UNSIGNED_BYTE};
 #endif
 Framebuffer::Framebuffer(
     int width,
